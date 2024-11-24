@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="background">#FFEAB6</color>
+    <color name="gray_01">#757575</color>
+    <color name="gray_02">#777777</color>
+    <!-- Grays -->
+    <color name="dark">#333333</color>
+    <color name="light">#757575</color>
+    <color name="white">#FFFFFF</color>
+    <color name="light_gray_1">#DCD6D6</color>
+    <color name="light_gray_2">#F2F2F2</color>
+    <color name="light_gray_3">#E8E8E8</color>
+    <color name="light_gray_4">#F5D4C1</color>
+
+    <!-- Yellows -->
+    <color name="yellow_bright">#FCB400</color>
+    <color name="yellow">#E08D00</color>
+    <color name="yellow_dark_1">#B87503</color>
+    <color name="yellow_light_1">#FFD66E</color>
+    <color name="yellow_light_2">#FFEAB8</color>
+
+    <!-- Oranges -->
+    <color name="orange_bright">#FF9900</color>
+    <color name="orange">#FF8000</color>
+    <color name="orange_dark_1">#E65C00</color>
+    <color name="orange_light_1">#FFD9B3</color>
+    <color name="orange_light_2">#FFE6CC</color>
+
+    <!-- Reds -->
+    <color name="red_bright">#FF3366</color>
+    <color name="red">#FF0033</color>
+    <color name="red_dark_1">#CC0033</color>
+    <color name="red_light_1">#FF99B3</color>
+    <color name="red_light_2">#FFCCE6</color>
+
+    <!-- Blues -->
+    <color name="blue_bright">#3366FF</color>
+    <color name="blue">#0033FF</color>
+    <color name="blue_dark_1">#001ACC</color>
+    <color name="blue_light_1">#99CCFF</color>
+    <color name="blue_light_2">#CCE6FF</color>
+
+    <!-- Greens -->
+    <color name="green_bright">#33CC33</color>
+    <color name="green">#009900</color>
+    <color name="green_dark_1">#006600</color>
+    <color name="green_light_1">#B3E6B3</color>
+    <color name="green_light_2">#CCFFCC</color>
+</resources>

@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">FoodRecipeApp</string>
+    <string name="title_icon">Yummy</string>
+    <string name="login">Đăng Nhập</string>
+    <string name="register">Đăng Kí</string>
+    <string name="name_app">Yummy Xin Chào</string>
+    <string name="sub_app">Rất vui khi gặp bạn</string>
+    <string name="new_user">Chưa có tài khoản? <b>Đăng Kí</b> </string>
+    <string name="have_user">Đã có tài khoản?  <b>Đăng Nhập</b> </string>
+    <string name="home">Trang chủ</string>
+    <string name="library">Thư viện</string>
+    <string name="messenger">Tin nhắn</string>
+    <string name="profile">Tài khoản</string>
+    <string name="search">Tìm kiếm</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
