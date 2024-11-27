@@ -1,5 +1,6 @@
 package com.example.foodrecipeapp.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -7,8 +8,12 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
+import com.example.foodrecipeapp.AddRecipe;
+import com.example.foodrecipeapp.LoginActivity;
 import com.example.foodrecipeapp.R;
+import com.example.foodrecipeapp.RegisterActivity;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -16,6 +21,14 @@ import com.example.foodrecipeapp.R;
  * create an instance of this fragment.
  */
 public class FragmentLibrary extends Fragment {
+
+    Button btn_add_recipe;
+
+
+
+
+
+
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -30,15 +43,6 @@ public class FragmentLibrary extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment FragmentLibrary.
-     */
-    // TODO: Rename and change types and number of parameters
     public static FragmentLibrary newInstance(String param1, String param2) {
         FragmentLibrary fragment = new FragmentLibrary();
         Bundle args = new Bundle();
@@ -61,6 +65,16 @@ public class FragmentLibrary extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_library, container, false);
+        View view = inflater.inflate(R.layout.fragment_library, container, false);
+        btn_add_recipe = view.findViewById(R.id.btn_add_recipe);
+        btn_add_recipe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), AddRecipe.class);
+                startActivity(intent);
+            }
+        });
+
+        return view;
     }
 }
