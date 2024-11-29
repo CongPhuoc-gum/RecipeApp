@@ -1,3 +1,5 @@
+import shadow.bundletool.com.android.tools.r8.internal.v7
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.google.gms.google.services)
@@ -33,6 +35,11 @@ android {
 }
 
 dependencies {
+    implementation("com.github.bumptech.glide:glide:4.15.1")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.15.1") // Nếu sử dụng Kotlin
+
+
+
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)

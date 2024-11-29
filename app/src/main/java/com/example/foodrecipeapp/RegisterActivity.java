@@ -3,6 +3,7 @@ package com.example.foodrecipeapp;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Patterns;
@@ -139,14 +140,18 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void updateUserInfo() {
         progressDialog.setMessage("Đang Lưu Thông Tin...");
-//        TimeStamp
         long timestamp = System.currentTimeMillis();
-
-//        get current user uid, since user is
         String uid = firebaseAuth.getUid();
-//        setup data
+
+        // Save user name in SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("userName", name); // Save the user's name
+        editor.apply();
+
+        // Continue with saving the user data to Firebase
         HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put("uid",uid);
+        hashMap.put("uid", uid);
         hashMap.put("email", email);
         hashMap.put("name", name);
         hashMap.put("profileImage", "");
@@ -168,7 +173,7 @@ public class RegisterActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         progressDialog.dismiss();
-                        Toast.makeText(RegisterActivity.this, ""+e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RegisterActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }

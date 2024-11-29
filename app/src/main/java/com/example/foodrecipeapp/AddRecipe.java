@@ -1,6 +1,8 @@
 package com.example.foodrecipeapp;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -14,6 +16,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -25,6 +28,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+
+import java.io.ByteArrayOutputStream;
 
 public class AddRecipe extends AppCompatActivity {
 
@@ -139,36 +144,58 @@ public class AddRecipe extends AppCompatActivity {
         String cookingTime = spinnerCookingTime.getSelectedItem().toString();
         String servings = spinnerServings.getSelectedItem().toString();
         String country = spinnerCountry.getSelectedItem().toString();
-        String userName = (currentUser != null) ? currentUser.getDisplayName() : "Unknown";
 
-        if (recipeName.isEmpty() || description.isEmpty() || ingredients.isEmpty() || steps.isEmpty()) {
-            Toast.makeText(this, "Vui lòng điền đủ thông tin công thức!", Toast.LENGTH_SHORT).show();
+        // Lấy tên người dùng từ SharedPreferences
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        String userEmail = "Unknown";  // Mặc định là Unknown nếu không tìm thấy người dùng
+
+        if (currentUser != null) {
+            userEmail = currentUser.getEmail();
+        }
+
+// Nếu email trống, bạn có thể thay thế bằng thông báo khác hoặc giữ "Unknown"
+        if (userEmail == null || userEmail.isEmpty()) {
+            userEmail = "Unknown";
+        }
+
+
+        if (recipeName.isEmpty() || description.isEmpty() || ingredients.isEmpty() || steps.isEmpty() || imageUri == null) {
+            Toast.makeText(this, "Vui lòng điền đủ thông tin và chọn ảnh!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (imageUri != null) {
-            StorageReference fileReference = storageReference.child(System.currentTimeMillis() + ".jpg");
-            fileReference.putFile(imageUri)
-                    .addOnSuccessListener(taskSnapshot -> fileReference.getDownloadUrl()
+        // Tiến hành tải ảnh lên Firebase và lưu công thức
+        String fileName = System.currentTimeMillis() + ".jpg";
+        StorageReference fileReference = storageReference.child(fileName);
+
+        String finalUserEmail = userEmail;
+        fileReference.putFile(imageUri)
+                .addOnSuccessListener(taskSnapshot -> {
+                    fileReference.getDownloadUrl()
                             .addOnSuccessListener(uri -> {
                                 String imageUrl = uri.toString();
-                                // Tạo đối tượng Recipe
-                                Recipe recipe = new Recipe(recipeName, description, ingredients, steps, imageUrl, userName, cookingTime, servings, country);
+                                Recipe recipe = new Recipe(recipeName, description, ingredients, steps, imageUrl, cookingTime, servings, country, finalUserEmail);
                                 saveRecipeToDatabase(recipe);
-                            }))
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(AddRecipe.this, "Lỗi tải ảnh lên Firebase", Toast.LENGTH_SHORT).show();
-                    });
-        }
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(this, "Lỗi khi lấy URL ảnh!", Toast.LENGTH_SHORT).show();
+                                e.printStackTrace();
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Lỗi tải ảnh lên Firebase!", Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                });
     }
 
+
     private void saveRecipeToDatabase(Recipe recipe) {
-        String recipeId = recipeRef.push().getKey(); // Tạo ID tự động cho công thức
+        String recipeId = recipeRef.push().getKey();
         if (recipeId != null) {
             recipeRef.child(recipeId).setValue(recipe)
                     .addOnSuccessListener(aVoid -> {
                         Toast.makeText(AddRecipe.this, "Công thức đã được lưu!", Toast.LENGTH_SHORT).show();
-                        finish(); // Đóng Activity sau khi lưu
+                        finish();
                     })
                     .addOnFailureListener(e -> {
                         Toast.makeText(AddRecipe.this, "Lỗi khi lưu công thức!", Toast.LENGTH_SHORT).show();
@@ -177,18 +204,57 @@ public class AddRecipe extends AppCompatActivity {
     }
 
     private void openFileChooser() {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        intent.setType("image/*");
-        startActivityForResult(intent, PICK_IMAGE_REQUEST);
+        CharSequence[] options = {"Chụp ảnh", "Chọn từ thư viện", "Hủy"};
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Chọn ảnh");
+        builder.setItems(options, (dialog, which) -> {
+            if (options[which].equals("Chụp ảnh")) {
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivityForResult(takePictureIntent, PICK_IMAGE_REQUEST);
+                }
+            } else if (options[which].equals("Chọn từ thư viện")) {
+                Intent pickPhotoIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                pickPhotoIntent.setType("image/*");
+                startActivityForResult(pickPhotoIntent, PICK_IMAGE_REQUEST);
+            } else {
+                dialog.dismiss();
+            }
+        });
+        builder.show();
     }
+
+
 
     // Nhận kết quả từ activity chọn ảnh
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            imageUri = data.getData();
-            selectedImageView.setImageURI(imageUri); // Hiển thị ảnh lên ImageView
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK) {
+            if (data != null && data.getData() != null) {
+                // Ảnh từ thư viện
+                imageUri = data.getData();
+                selectedImageView.setImageURI(imageUri);
+            } else if (data != null && data.getExtras() != null) {
+                // Ảnh từ camera
+                Bitmap photo = (Bitmap) data.getExtras().get("data");
+                if (photo != null) {
+                    selectedImageView.setImageBitmap(photo);
+                    // Chuyển Bitmap sang URI để tải lên Firebase
+                    imageUri = getImageUriFromBitmap(photo);
+                }
+            }
         }
     }
+
+
+    // Chuyển Bitmap sang URI
+    private Uri getImageUriFromBitmap(Bitmap bitmap) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "CameraImage", null);
+        return Uri.parse(path);
+    }
+
 }
