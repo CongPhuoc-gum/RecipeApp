@@ -52,4 +52,17 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+
+
+
+
+    // Firebase UI Database
+    implementation("com.firebaseui:firebase-ui-database:8.0.2")
+
+    // Glide for image loading
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+
+   
+
 }
