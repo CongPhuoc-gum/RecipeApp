@@ -23,10 +23,10 @@
         android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
         tools:targetApi="31">
         <activity
-            android:name=".ItemRecipes"
+            android:name=".RecipeDetail"
             android:exported="false" />
         <activity
-            android:name=".RecipeDetail"
+            android:name=".ItemRecipes"
             android:exported="false" />
         <activity
             android:name=".AddRecipe"

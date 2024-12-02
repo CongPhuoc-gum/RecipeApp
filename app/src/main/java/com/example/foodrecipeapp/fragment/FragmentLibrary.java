@@ -13,11 +13,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.example.foodrecipeapp.AddRecipe;
-import com.example.foodrecipeapp.LoginActivity;
 import com.example.foodrecipeapp.R;
 import com.example.foodrecipeapp.Recipe;
-import com.example.foodrecipeapp.RegisterActivity;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -78,16 +75,19 @@ public class FragmentLibrary extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_library, container, false);
+        // RecyclerView
         recyclerView = view.findViewById(R.id.recipes_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        // Khởi tạo danh sách
         recipeList = new ArrayList<>();
-        adapter = new Recipe_Adapter(getContext(), recipeList);
+        adapter = new Recipe_Adapter(getContext(), recipeList, R.layout.fragment_item_recipe); // Layout của FragmentLibrary
         recyclerView.setAdapter(adapter);
 
+        // Kết nối Firebase và tải dữ liệu
         loadRecipesFromFirebase();
 
-
+        // Button thêm công thức
         btn_add_recipe = view.findViewById(R.id.btn_add_recipe);
         btn_add_recipe.setOnClickListener(new View.OnClickListener() {
             @Override

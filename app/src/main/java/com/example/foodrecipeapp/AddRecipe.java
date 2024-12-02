@@ -145,19 +145,15 @@ public class AddRecipe extends AppCompatActivity {
         String servings = spinnerServings.getSelectedItem().toString();
         String country = spinnerCountry.getSelectedItem().toString();
 
-        // Lấy tên người dùng từ SharedPreferences
+        // Lấy tên người dùng từ Firebase Authentication
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        String userEmail = "Unknown";  // Mặc định là Unknown nếu không tìm thấy người dùng
+        final String userEmail;  // Declare as final
 
-        if (currentUser != null) {
+        if (currentUser != null && currentUser.getEmail() != null) {
             userEmail = currentUser.getEmail();
+        } else {
+            userEmail = "Unknown";  // Assign value directly in the else block
         }
-
-// Nếu email trống, bạn có thể thay thế bằng thông báo khác hoặc giữ "Unknown"
-        if (userEmail == null || userEmail.isEmpty()) {
-            userEmail = "Unknown";
-        }
-
 
         if (recipeName.isEmpty() || description.isEmpty() || ingredients.isEmpty() || steps.isEmpty() || imageUri == null) {
             Toast.makeText(this, "Vui lòng điền đủ thông tin và chọn ảnh!", Toast.LENGTH_SHORT).show();
@@ -168,20 +164,17 @@ public class AddRecipe extends AppCompatActivity {
         String fileName = System.currentTimeMillis() + ".jpg";
         StorageReference fileReference = storageReference.child(fileName);
 
-        String finalUserEmail = userEmail;
         fileReference.putFile(imageUri)
-                .addOnSuccessListener(taskSnapshot -> {
-                    fileReference.getDownloadUrl()
-                            .addOnSuccessListener(uri -> {
-                                String imageUrl = uri.toString();
-                                Recipe recipe = new Recipe(recipeName, description, ingredients, steps, imageUrl, cookingTime, servings, country, finalUserEmail);
-                                saveRecipeToDatabase(recipe);
-                            })
-                            .addOnFailureListener(e -> {
-                                Toast.makeText(this, "Lỗi khi lấy URL ảnh!", Toast.LENGTH_SHORT).show();
-                                e.printStackTrace();
-                            });
-                })
+                .addOnSuccessListener(taskSnapshot -> fileReference.getDownloadUrl()
+                        .addOnSuccessListener(uri -> {
+                            String imageUrl = uri.toString();  // Lấy URL ảnh dưới dạng String
+                            Recipe recipe = new Recipe(recipeName, description, ingredients, steps, imageUrl, cookingTime, servings, country, userEmail);
+                            saveRecipeToDatabase(recipe);
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(this, "Lỗi khi lấy URL ảnh!", Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        }))
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Lỗi tải ảnh lên Firebase!", Toast.LENGTH_SHORT).show();
                     e.printStackTrace();
@@ -195,6 +188,17 @@ public class AddRecipe extends AppCompatActivity {
             recipeRef.child(recipeId).setValue(recipe)
                     .addOnSuccessListener(aVoid -> {
                         Toast.makeText(AddRecipe.this, "Công thức đã được lưu!", Toast.LENGTH_SHORT).show();
+                        // Chuyển sang màn hình chi tiết công thức
+                        Intent intent = new Intent(AddRecipe.this, RecipeDetail.class);
+                        intent.putExtra("recipeName", recipe.getRecipeName());
+                        intent.putExtra("description", recipe.getDescription());
+                        intent.putExtra("ingredients", recipe.getIngredients());
+                        intent.putExtra("steps", recipe.getSteps());
+                        intent.putExtra("imageUrl", recipe.getImageUrl());
+                        intent.putExtra("cookingTime", recipe.getCookingTime());
+                        intent.putExtra("servings", recipe.getServings());
+                        intent.putExtra("country", recipe.getCountry()); // Thêm country vào Intent
+                        startActivity(intent);
                         finish();
                     })
                     .addOnFailureListener(e -> {

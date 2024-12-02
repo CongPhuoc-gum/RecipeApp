@@ -10,9 +10,11 @@ public class Recipe {
     private String servings;
     private String country;
     private String userEmail;
+    private String userName;
 
+    // Constructor không tham số yêu cầu bởi Firebase
     public Recipe() {
-
+        // Firebase sử dụng constructor này để deserialize đối tượng từ cơ sở dữ liệu.
     }
 
     // Constructor có tham số
@@ -27,9 +29,9 @@ public class Recipe {
         this.servings = servings;
         this.country = country;
         this.userEmail = userEmail;
-    }
+}
 
-    // Getter và setter (nếu cần)
+    // Các phương thức Getter và Setter cho mỗi trường
     public String getRecipeName() {
         return recipeName;
     }
@@ -100,6 +102,14 @@ public class Recipe {
 
     public void setUserEmail(String userEmail) {
         this.userEmail = userEmail;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 }
 

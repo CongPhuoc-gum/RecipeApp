@@ -13,8 +13,8 @@
         android:icon="@drawable/messenger"/>
 
     <item android:id="@+id/navigation_favorites"
-        android:title="@string/search"
-        android:icon="@drawable/search_icon"/>
+        android:title="Yêu thích"
+        android:icon="@drawable/heart"/>
 
     <item android:id="@+id/navigation_profile"
         android:title="@string/profile"
