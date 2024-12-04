@@ -21,8 +21,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="end">
+            android:gravity="end"
+            android:orientation="horizontal">
 
             <!-- Delete Button on the Right -->
             <ImageButton
@@ -30,8 +30,8 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_marginEnd="16dp"
-                android:src="@drawable/ic_delete"
-                android:background="@null"/>
+                android:background="@null"
+                android:src="@drawable/ic_delete" />
         </LinearLayout>
 
         <!-- Image -->
@@ -42,7 +42,7 @@
             android:layout_gravity="center"
             android:src="@drawable/img_taocongthuc"
             android:contentDescription="Recipe Image"
-            android:scaleType="fitCenter" />
+            android:scaleType="centerInside" />
 
         <!-- Recipe Name -->
         <TextView

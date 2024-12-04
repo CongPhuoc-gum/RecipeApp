@@ -245,15 +245,12 @@ public class AddRecipe extends AppCompatActivity {
                 Bitmap photo = (Bitmap) data.getExtras().get("data");
                 if (photo != null) {
                     selectedImageView.setImageBitmap(photo);
-                    // Chuyển Bitmap sang URI để tải lên Firebase
                     imageUri = getImageUriFromBitmap(photo);
                 }
             }
         }
     }
 
-
-    // Chuyển Bitmap sang URI
     private Uri getImageUriFromBitmap(Bitmap bitmap) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
