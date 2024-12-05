@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -11,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.foodrecipeapp.adapter.ChatRecyclerAdapter;
 import com.example.foodrecipeapp.model.ChatMessageModel;
 import com.example.foodrecipeapp.model.ChatroomModel;
@@ -41,6 +43,7 @@ public class ChatActivity extends AppCompatActivity {
     private ImageButton backBtn;
     private TextView otherUsername;
     private RecyclerView recyclerView;
+    private ImageView profile_pic_image_view;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,9 +60,16 @@ public class ChatActivity extends AppCompatActivity {
         backBtn = findViewById(R.id.back_btn);
         otherUsername = findViewById(R.id.other_username);
         recyclerView = findViewById(R.id.chat_recycler_view);
+        profile_pic_image_view = findViewById(R.id.profile_pic_image_view);
 
         backBtn.setOnClickListener(v -> onBackPressed());
         otherUsername.setText(otherUser.getName());
+        Glide.with(this)
+                .load(otherUser.getProfileImage())
+                .placeholder(R.drawable.image_profile)
+                .error(R.drawable.image_profile)
+                .circleCrop()
+                .into(profile_pic_image_view);
 
         // Gửi tin nhắn khi người dùng nhấn nút gửi
         sendMessageBtn.setOnClickListener(view -> {

@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.foodrecipeapp"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
@@ -52,17 +52,12 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-
-
-
-
-
     // Firebase UI Database
     implementation("com.firebaseui:firebase-ui-database:8.0.2")
 
     // Glide for image loading
     implementation("com.github.bumptech.glide:glide:4.16.0")
-
+    implementation("com.github.dhaval2404:imagepicker:2.1")
    
 
 }
