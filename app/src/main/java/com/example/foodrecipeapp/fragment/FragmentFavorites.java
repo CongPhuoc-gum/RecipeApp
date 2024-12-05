@@ -88,7 +88,7 @@ public class FragmentFavorites extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         favoriteRecipes = new ArrayList<>();
-        adapter = new Recipe_Adapter(getContext(), favoriteRecipes, R.layout.fragment_item_recipe);
+        adapter = new Recipe_Adapter(getContext(), favoriteRecipes, R.layout.fragment_item_recipe,false);
         recyclerView.setAdapter(adapter);
 
         // Reference to Firebase

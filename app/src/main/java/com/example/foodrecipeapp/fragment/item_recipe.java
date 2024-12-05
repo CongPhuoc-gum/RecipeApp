@@ -67,8 +67,8 @@ public class item_recipe extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_item_recipe, container, false);
 
-        ImageButton btnDelete = view.findViewById(R.id.btnDeleteCard);
-        CardView cardView = view.findViewById(R.id.card_view);
+        ImageButton btnDelete = view.findViewById(R.id.btnDelete);
+        CardView cardView = view.findViewById(R.id.cardView);
 
         // Khi nhấn vào CardView, mở màn hình chi tiết công thức
         cardView.setOnClickListener(new View.OnClickListener() {

@@ -15,6 +15,7 @@ import android.widget.Button;
 import com.example.foodrecipeapp.AddRecipe;
 import com.example.foodrecipeapp.R;
 import com.example.foodrecipeapp.Recipe;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -26,48 +27,18 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link FragmentLibrary#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class FragmentLibrary extends Fragment {
 
-    Button btn_add_recipe;
+    private Button btn_add_recipe;
     private RecyclerView recyclerView;
     private Recipe_Adapter adapter;
     private List<Recipe> recipeList;
 
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private FirebaseAuth mAuth;
+    private String currentUserEmail;
 
     public FragmentLibrary() {
         // Required empty public constructor
-    }
-
-    public static FragmentLibrary newInstance(String param1, String param2) {
-        FragmentLibrary fragment = new FragmentLibrary();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -75,16 +46,21 @@ public class FragmentLibrary extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_library, container, false);
-        // RecyclerView
+
+        // Khởi tạo FirebaseAuth để lấy email người dùng hiện tại
+        mAuth = FirebaseAuth.getInstance();
+        currentUserEmail = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getEmail() : "";
+
+        // Khởi tạo RecyclerView
         recyclerView = view.findViewById(R.id.recipes_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Khởi tạo danh sách
+        // Khởi tạo danh sách công thức
         recipeList = new ArrayList<>();
-        adapter = new Recipe_Adapter(getContext(), recipeList, R.layout.fragment_item_recipe); // Layout của FragmentLibrary
+        adapter = new Recipe_Adapter(getContext(), recipeList, R.layout.fragment_item_recipe,false); // Layout của FragmentLibrary
         recyclerView.setAdapter(adapter);
 
-        // Kết nối Firebase và tải dữ liệu
+        // Kết nối Firebase và tải dữ liệu chỉ theo email người dùng
         loadRecipesFromFirebase();
 
         // Button thêm công thức
@@ -106,20 +82,29 @@ public class FragmentLibrary extends Fragment {
         recipeRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                recipeList.clear();
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    Recipe recipe = dataSnapshot.getValue(Recipe.class);
-                    if (recipe != null) {
-                        recipeList.add(recipe);
-                    }
-                }
+                recipeList.clear(); // Xóa dữ liệu cũ trước khi thêm mới
+
+                // Duyệt qua các công thức trong Firebase và thêm công thức của người dùng vào danh sách
+                loadUserRecipes(snapshot);
+
+                // Cập nhật RecyclerView sau khi tải dữ liệu
                 adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                // Handle error
+                // Xử lý lỗi nếu có
             }
         });
+    }
+
+    // Tách riêng logic tải công thức của người dùng
+    private void loadUserRecipes(DataSnapshot snapshot) {
+        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+            Recipe recipe = dataSnapshot.getValue(Recipe.class);
+            if (recipe != null && recipe.getUserEmail() != null && recipe.getUserEmail().equals(currentUserEmail)) {
+                recipeList.add(recipe); // Thêm công thức của người dùng vào danh sách
+            }
+        }
     }
 }

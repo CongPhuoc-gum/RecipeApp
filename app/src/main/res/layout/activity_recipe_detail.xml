@@ -78,7 +78,17 @@
                 android:layout_height="wrap_content"
                 android:text="Quoc Gia"
                 android:textSize="16sp"
-                android:paddingTop="4dp" />
+                android:paddingTop="4dp"
+                android:textColor="@color/black"/>
+
+            <TextView
+                android:id="@+id/text_posted_by"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Người đăng: N/A"
+                android:textSize="16sp"
+                android:paddingTop="4dp"
+                android:textColor="@color/black" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -87,7 +97,8 @@
                 android:id="@+id/text_description"
                 android:textSize="18sp"
                 android:fontFamily="@font/abeezee"
-                android:paddingTop="8dp" />
+                android:paddingTop="8dp"
+                android:textColor="@color/black"/>
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
@@ -105,11 +116,13 @@
                     android:padding="16dp">
 
                     <TextView
+                        android:id="@+id/text_servings"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Khau Phan"
+                        android:text="Khau Phan: "
                         android:fontFamily="@font/abeezee"
-                        android:textSize="12sp"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
                         android:textColor="@color/orange_bright" />
 
                 </LinearLayout>

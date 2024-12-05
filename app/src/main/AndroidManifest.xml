@@ -34,6 +34,7 @@
         <activity
             android:name=".Custom_Progress_Dialog"
             android:exported="false" />
+        <activity android:name=".FogotPasswordActivity"/>
         <activity
             android:name=".Dashboard"
             android:exported="false" />

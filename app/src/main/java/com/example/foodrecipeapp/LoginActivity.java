@@ -35,7 +35,7 @@ public class LoginActivity extends AppCompatActivity {
     Button btn_login;
     EditText inputemail, inputpassword;
     private FirebaseAuth firebaseAuth;
-    private AlertDialog progressDialog;
+        private AlertDialog progressDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,7 +55,8 @@ public class LoginActivity extends AppCompatActivity {
         tv_forgot.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(LoginActivity.this, FogotPasswordActivity.class));
+                Intent intent = new Intent(LoginActivity.this, FogotPasswordActivity.class);
+                startActivity(intent);
             }
         });
 
