@@ -30,7 +30,7 @@ import com.google.firebase.database.ValueEventListener;
 
 public class LoginActivity extends AppCompatActivity {
 
-    TextView tv_newuser;
+    TextView tv_newuser,tv_forgot;
     ImageButton btn_back;
     Button btn_login;
     EditText inputemail, inputpassword;
@@ -46,9 +46,19 @@ public class LoginActivity extends AppCompatActivity {
         btn_login = findViewById(R.id.loginBtn);
         inputemail = findViewById(R.id.input_email);
         inputpassword = findViewById(R.id.input_password);
+        tv_forgot = findViewById(R.id.forgot_pw);
 
 //        init firebase auth
         firebaseAuth = FirebaseAuth.getInstance();
+
+        //chuyen sang trang forgot password
+        tv_forgot.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(LoginActivity.this, FogotPasswordActivity.class));
+            }
+        });
+
 
 
         btn_back.setOnClickListener(new View.OnClickListener() {

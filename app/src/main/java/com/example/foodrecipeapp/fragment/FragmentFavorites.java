@@ -1,14 +1,31 @@
 package com.example.foodrecipeapp.fragment;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.foodrecipeapp.R;
+import com.example.foodrecipeapp.Recipe;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import org.checkerframework.checker.nullness.qual.NonNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -16,6 +33,11 @@ import com.example.foodrecipeapp.R;
  * create an instance of this fragment.
  */
 public class FragmentFavorites extends Fragment {
+    private RecyclerView recyclerView;
+    private Recipe_Adapter adapter;
+    private List<Recipe> favoriteRecipes;
+    private DatabaseReference favoritesRef;
+
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -60,7 +82,42 @@ public class FragmentFavorites extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_favorites, container, false);
+        View view = inflater.inflate(R.layout.fragment_favorites, container, false);
+
+        recyclerView = view.findViewById(R.id.recipess_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        favoriteRecipes = new ArrayList<>();
+        adapter = new Recipe_Adapter(getContext(), favoriteRecipes, R.layout.fragment_item_recipe);
+        recyclerView.setAdapter(adapter);
+
+        // Reference to Firebase
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        favoritesRef = FirebaseDatabase.getInstance().getReference("users").child(userId).child("favorites");
+
+        loadFavorites();
+
+        return view;
+    }
+
+    private void loadFavorites() {
+        favoritesRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                favoriteRecipes.clear();
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    Recipe recipe = dataSnapshot.getValue(Recipe.class);
+                    if (recipe != null) {
+                        favoriteRecipes.add(recipe);
+                    }
+                }
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Handle database error
+            }
+        });
     }
 }

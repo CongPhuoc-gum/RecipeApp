@@ -55,7 +55,7 @@
             holder.recipeCountry.setText(recipe.getCountry());
             holder.recipeUsername.setText("Người đăng: " + recipe.getUserEmail());
 
-            // Set image using Glide (No need for setImageResource anymore)
+
             Glide.with(context)
                     .load(recipe.getImageUrl())
                     .into(holder.recipeImage);

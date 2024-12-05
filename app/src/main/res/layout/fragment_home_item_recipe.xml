@@ -28,7 +28,7 @@
                 android:layout_gravity="center"
                 android:src="@drawable/img_taocongthuc"
                 android:contentDescription="Recipe Image"
-                android:scaleType="fitCenter" />
+                android:scaleType="centerInside" />
 
         </FrameLayout>
 
