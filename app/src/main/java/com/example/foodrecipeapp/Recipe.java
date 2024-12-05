@@ -18,7 +18,7 @@ public class Recipe {
     // Constructor đầy đủ
     public Recipe(String recipeName, String description, String ingredients, String steps,
                   String imageUrl, String cookingTime, String servings, String country,
-                  String userEmail) {
+                  String userEmail, String username) {
         this.recipeName = recipeName;
         this.description = description;
         this.ingredients = ingredients;
@@ -104,12 +104,12 @@ public class Recipe {
         this.userEmail = userEmail;
     }
 
-    public String getUserName() {
+    public String getUsername() {
         return userName;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUsername(String username) {
+        this.userName = username;
     }
 }
 

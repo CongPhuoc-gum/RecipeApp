@@ -51,7 +51,7 @@ public class FragmentHome extends Fragment {
         // Khởi tạo RecyclerView thứ hai (Hiển thị công thức mới nhất)
         recyclerView2 = view.findViewById(R.id.recipe_recycler_view_2);
         recyclerView2.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        adapter2 = new Recipe_Adapter(getContext(), recipeListNewest, R.layout.fragment_home_item_recipe,false); // Layout của FragmentHome
+        adapter2 = new Recipe_Adapter(getContext(), recipeListNewest, R.layout.fragment_home_item_recipe,true); // Layout của FragmentHome
         recyclerView2.setAdapter(adapter2);
 
         // Kết nối Firebase và tải dữ liệu

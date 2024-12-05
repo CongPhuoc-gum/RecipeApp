@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,14 +33,14 @@ import java.util.Random;
 public class Recipe_Adapter extends RecyclerView.Adapter<Recipe_Adapter.RecipeViewHolder> {
     private Context context;
     private List<Recipe> recipeList;
-    private int layoutId;  // Layout ID dùng cho việc xác định CardView nhỏ hay lớn
-    private boolean isHomePage;  // Thêm flag để xác định là trang Home hay Library
+    private int layoutId;  // Layout ID for small or large CardView
+    private boolean isHomePage;  // Flag to check if it's Home Page or Library
 
     public Recipe_Adapter(Context context, List<Recipe> recipeList, int layoutId, boolean isHomePage) {
         this.context = context;
         this.recipeList = recipeList;
         this.layoutId = layoutId;
-        this.isHomePage = isHomePage;  // Lưu flag isHomePage khi truyền vào
+        this.isHomePage = isHomePage;
     }
 
     @NonNull
@@ -58,39 +59,43 @@ public class Recipe_Adapter extends RecyclerView.Adapter<Recipe_Adapter.RecipeVi
     public void onBindViewHolder(@NonNull RecipeViewHolder holder, int position) {
         Recipe recipe = recipeList.get(position);
 
-        // Nếu đang ở trang Home, thì hiển thị tất cả các công thức mà không kiểm tra người dùng
+        // Kiểm tra nếu đây là trang Library và lọc công thức theo đó
         if (!isHomePage) {
             String currentUserEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
-            // Nếu đang ở trang Library và công thức không phải của người dùng thì ẩn
             if (recipe.getUserEmail() != null && !recipe.getUserEmail().equals(currentUserEmail)) {
-                holder.cardView.setVisibility(View.GONE); // Ẩn nếu không phải của người dùng
+                holder.cardView.setVisibility(View.GONE);  // Ẩn nếu không phải công thức của người dùng
             } else {
-                holder.cardView.setVisibility(View.VISIBLE); // Hiển thị nếu là công thức của người dùng
+                holder.cardView.setVisibility(View.VISIBLE);  // Hiển thị nếu là công thức của người dùng
             }
         } else {
-            // Nếu đang ở trang Home, luôn hiển thị công thức
-            holder.cardView.setVisibility(View.VISIBLE);
+            holder.cardView.setVisibility(View.VISIBLE);  // Hiển thị tất cả công thức trên trang chủ
         }
 
-        // Cập nhật các trường thông tin của công thức
+        // Cập nhật thông tin công thức trên card
         holder.recipeName.setText(recipe.getRecipeName());
         holder.recipeDescription.setText(recipe.getDescription());
         holder.recipeCountry.setText(recipe.getCountry());
 
-        // Hiển thị tên người dùng (nếu có), nếu không hiển thị email
-        String userInfo = recipe.getUserName() != null && !recipe.getUserName().isEmpty()
-                ? recipe.getUserName()
+        // Xử lý trường servings
+        if (holder.recipeServings != null) {
+            holder.recipeServings.setText("Khẩu phần: " + recipe.getServings());
+        } else {
+            Log.e("Recipe_Adapter", "recipeServings is null");
+        }
+
+        // Hiển thị tên người đăng nếu có, nếu không thì hiển thị email
+        String userInfo = recipe.getUsername() != null && !recipe.getUsername().isEmpty()
+                ? recipe.getUsername()
                 : recipe.getUserEmail();
         holder.recipeUsername.setText("Người đăng: " + userInfo);
 
-        // Tải ảnh từ URL
+        // Tải hình ảnh từ URL bằng Glide
         Glide.with(context)
                 .load(recipe.getImageUrl())
                 .into(holder.recipeImage);
 
-        // Cập nhật sự kiện click
+        // Đặt sự kiện click để xem chi tiết công thức
         holder.cardView.setOnClickListener(v -> {
-            // Chuyển sang màn hình chi tiết công thức
             Intent intent = new Intent(context, RecipeDetail.class);
             intent.putExtra("recipeName", recipe.getRecipeName());
             intent.putExtra("description", recipe.getDescription());
@@ -98,11 +103,11 @@ public class Recipe_Adapter extends RecyclerView.Adapter<Recipe_Adapter.RecipeVi
             intent.putExtra("steps", recipe.getSteps());
             intent.putExtra("imageUrl", recipe.getImageUrl());
             intent.putExtra("country", recipe.getCountry());
-            intent.putExtra("userName", recipe.getUserName());
+            intent.putExtra("userName", recipe.getUsername());  // Chuyển tên người dùng sang Activity chi tiết
             context.startActivity(intent);
         });
 
-        // Hiển thị nút delete nếu ở trang Library
+        // Hiển thị nút xóa nếu ở trang Library và công thức là của người dùng
         if (layoutId == R.layout.fragment_item_recipe && holder.btnDelete != null) {
             holder.btnDelete.setVisibility(View.VISIBLE);
             holder.btnDelete.setOnClickListener(v -> {
@@ -112,16 +117,16 @@ public class Recipe_Adapter extends RecyclerView.Adapter<Recipe_Adapter.RecipeVi
                 notifyItemRangeChanged(position, recipeList.size());
             });
         } else if (holder.btnDelete != null) {
-            holder.btnDelete.setVisibility(View.GONE);
+            holder.btnDelete.setVisibility(View.GONE);  // Ẩn nút xóa ở trang chủ
         }
 
-        // Đặt màu nền ngẫu nhiên cho CardView
+        // Đặt màu nền ngẫu nhiên cho card view
         Random random = new Random();
         @SuppressLint("ResourceType") String[] lightColors = {
-                context.getString(R.color.yellow_light_1),
-                context.getString(R.color.yellow_light_2),
-                context.getString(R.color.orange_light_1),
-                context.getString(R.color.orange_light_2)
+                context.getString(R.color.l_1),
+                context.getString(R.color.l_2),
+                context.getString(R.color.l_3),
+                context.getString(R.color.l_4)
         };
 
         int randomIndex = random.nextInt(lightColors.length);
@@ -129,19 +134,20 @@ public class Recipe_Adapter extends RecyclerView.Adapter<Recipe_Adapter.RecipeVi
         holder.cardView.setCardBackgroundColor(randomColor);
     }
 
+
     private void deleteRecipeFromFirebase(String recipeName) {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("recipes");
         databaseReference.orderByChild("recipeName").equalTo(recipeName).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    snapshot.getRef().removeValue();
+                    snapshot.getRef().removeValue();  // Remove recipe from Firebase
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Xử lý lỗi khi xóa
+                // Handle error during deletion
             }
         });
     }
@@ -153,23 +159,22 @@ public class Recipe_Adapter extends RecyclerView.Adapter<Recipe_Adapter.RecipeVi
 
     public static class RecipeViewHolder extends RecyclerView.ViewHolder {
         ImageView recipeImage;
-        TextView recipeName, recipeDescription, recipeCountry, recipeUsername;
+        TextView recipeName, recipeDescription, recipeCountry, recipeUsername, recipeServings;
         CardView cardView;
         ImageButton btnDelete;
 
         public RecipeViewHolder(View view) {
             super(view);
-            // Khởi tạo các view
             recipeImage = itemView.findViewById(R.id.recipe_image);
             recipeName = itemView.findViewById(R.id.recipe_name);
             recipeDescription = itemView.findViewById(R.id.recipe_description);
             recipeCountry = itemView.findViewById(R.id.recipe_country);
+            recipeServings = itemView.findViewById(R.id.text_servings); // Đ
             recipeUsername = itemView.findViewById(R.id.recipe_username);
             btnDelete = itemView.findViewById(R.id.btnDelete);
-
-            // Gán CardView theo layout
             cardView = itemView.findViewById(R.id.cardView);
         }
     }
 }
+
 

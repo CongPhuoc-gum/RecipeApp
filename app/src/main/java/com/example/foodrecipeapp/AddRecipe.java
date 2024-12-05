@@ -148,11 +148,14 @@ public class AddRecipe extends AppCompatActivity {
         // Lấy tên người dùng từ Firebase Authentication
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         final String userEmail;  // Declare as final
+        final String userName;    // Declare for username
 
-        if (currentUser != null && currentUser.getEmail() != null) {
+        if (currentUser != null) {
             userEmail = currentUser.getEmail();
+            userName = currentUser.getDisplayName();  // Retrieve display name
         } else {
-            userEmail = "Unknown";  // Assign value directly in the else block
+            userEmail = "Unknown";  // Default value if user is not logged in
+            userName = "Anonymous"; // Default username
         }
 
         if (recipeName.isEmpty() || description.isEmpty() || ingredients.isEmpty() || steps.isEmpty() || imageUri == null) {
@@ -168,7 +171,7 @@ public class AddRecipe extends AppCompatActivity {
                 .addOnSuccessListener(taskSnapshot -> fileReference.getDownloadUrl()
                         .addOnSuccessListener(uri -> {
                             String imageUrl = uri.toString();  // Lấy URL ảnh dưới dạng String
-                            Recipe recipe = new Recipe(recipeName, description, ingredients, steps, imageUrl, cookingTime, servings, country, userEmail);
+                            Recipe recipe = new Recipe(recipeName, description, ingredients, steps, imageUrl, cookingTime, servings, country, userEmail, userName);  // Include username
                             saveRecipeToDatabase(recipe);
                         })
                         .addOnFailureListener(e -> {
@@ -180,6 +183,7 @@ public class AddRecipe extends AppCompatActivity {
                     e.printStackTrace();
                 });
     }
+
 
 
     private void saveRecipeToDatabase(Recipe recipe) {

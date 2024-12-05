@@ -12,7 +12,10 @@
     <color name="light_gray_2">#F2F2F2</color>
     <color name="light_gray_3">#E8E8E8</color>
     <color name="light_gray_4">#F5D4C1</color>
-
+    <color name="l_1">#F5D4C1</color>
+    <color name="l_2">#FFEAB6</color>
+    <color name="l_3">#FFCCE6</color>
+    <color name="l_4">#99CCFF</color>
     <!-- Yellows -->
     <color name="yellow_bright">#FCB400</color>
     <color name="yellow">#E08D00</color>
