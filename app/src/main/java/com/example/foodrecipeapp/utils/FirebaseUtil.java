@@ -24,6 +24,9 @@ public class FirebaseUtil {
     public static DatabaseReference currentUserDetails() {
         return FirebaseDatabase.getInstance().getReference("Users").child(currentUserId());
     }
+    public static DatabaseReference getUserReference(String userId) {
+        return FirebaseDatabase.getInstance().getReference("Users").child(userId);
+    }
 
     // Lấy tham chiếu đến tất cả người dùng trong Realtime Database
     public static DatabaseReference allUserCollectionReference() {
