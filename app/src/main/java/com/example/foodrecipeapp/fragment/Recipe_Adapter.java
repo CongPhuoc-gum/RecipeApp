@@ -66,11 +66,15 @@ public class Recipe_Adapter extends RecyclerView.Adapter<Recipe_Adapter.RecipeVi
                 holder.cardView.setVisibility(View.GONE);  // Ẩn nếu không phải công thức của người dùng
             } else {
                 holder.cardView.setVisibility(View.VISIBLE);  // Hiển thị nếu là công thức của người dùng
-                holder.btnDelete.setVisibility(View.VISIBLE);  // Hiển thị nút xóa
+                if (holder.btnDelete != null) {
+                    holder.btnDelete.setVisibility(View.VISIBLE);  // Hiển thị nút xóa nếu không null
+                }
             }
         } else {
             holder.cardView.setVisibility(View.VISIBLE);  // Hiển thị tất cả công thức trên trang chủ
-            holder.btnDelete.setVisibility(View.GONE);  // Ẩn nút xóa trên trang chủ
+            if (holder.btnDelete != null) {
+                holder.btnDelete.setVisibility(View.GONE);  // Ẩn nút xóa trên trang chủ
+            }
         }
 
         // Cập nhật thông tin công thức trên card
@@ -197,8 +201,13 @@ public class Recipe_Adapter extends RecyclerView.Adapter<Recipe_Adapter.RecipeVi
             recipeCountry = itemView.findViewById(R.id.recipe_country);
             recipeServings = itemView.findViewById(R.id.text_servings);
             recipeUsername = itemView.findViewById(R.id.recipe_username);
-            btnDelete = itemView.findViewById(R.id.btnDelete);
+            btnDelete = itemView.findViewById(R.id.btnDelete); // Có thể bị null nếu layout không chứa ID này
             cardView = itemView.findViewById(R.id.cardView);
+
+            // Kiểm tra null và log lỗi
+            if (recipeImage == null) Log.e("RecipeViewHolder", "recipeImage is null");
+            if (recipeName == null) Log.e("RecipeViewHolder", "recipeName is null");
+            if (btnDelete == null) Log.e("RecipeViewHolder", "btnDelete is null");
         }
     }
 }
