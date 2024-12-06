@@ -24,6 +24,9 @@
         android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
         tools:targetApi="31">
         <activity
+            android:name=".ActivityProfile"
+            android:exported="false" />
+        <activity
             android:name=".RecipeDetail"
             android:exported="false" />
         <activity
@@ -35,7 +38,7 @@
         <activity
             android:name=".Custom_Progress_Dialog"
             android:exported="false" />
-        <activity android:name=".FogotPasswordActivity"/>
+        <activity android:name=".FogotPasswordActivity" />
         <activity
             android:name=".Dashboard"
             android:exported="false" />
@@ -63,13 +66,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <service
             android:name=".services.MyFirebaseMessagingService"
             android:exported="false"
             android:permission="TODO">
             <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
-                <action android:name="com.google.android.c2m.intent.RECEIVE"/>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+                <action android:name="com.google.android.c2m.intent.RECEIVE" />
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>

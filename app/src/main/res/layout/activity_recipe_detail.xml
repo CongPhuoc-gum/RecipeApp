@@ -81,14 +81,34 @@
                 android:paddingTop="4dp"
                 android:textColor="@color/black"/>
 
-            <TextView
-                android:id="@+id/recipe_username"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Người đăng"
-                android:textSize="16sp"
-                android:paddingTop="4dp"
-                android:textColor="@color/black" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingTop="4dp">
+
+                <TextView
+                    android:id="@+id/recipe_username"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Người đăng"
+                    android:textSize="16sp"
+                    android:textColor="@color/black" />
+
+                <Button
+                    android:id="@+id/btn_chat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nhắn tin"
+                    android:backgroundTint="@color/blue_light_2"
+                    android:textColor="@color/black"
+                    android:padding="8dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:drawablePadding="4dp" />
+            </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"

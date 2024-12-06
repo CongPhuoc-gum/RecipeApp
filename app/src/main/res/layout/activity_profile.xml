@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".ActivityProfile">
+
+    <!-- Tiêu đề Trang cá nhân -->
+    <TextView
+        android:id="@+id/text_trangcanhan"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/text_trangcanhan"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:gravity="start"
+        android:paddingBottom="16dp" />
+
+    <!-- Layout ngang chứa hình đại diện và thông tin người dùng -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- Hình đại diện -->
+        <ImageView
+            android:id="@+id/profile_pic"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginBottom="16dp"
+            android:src="@drawable/image_profile" />
+
+        <!-- Layout dọc chứa tên và email -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_marginStart="10dp"
+            android:gravity="center_vertical">
+
+            <!-- Tên người dùng -->
+            <TextView
+                android:id="@+id/text_username_profile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="User Name"
+                android:textColor="@color/black"
+                android:textSize="15sp"
+                android:padding="8dp" />
+
+            <!-- Email người dùng -->
+            <TextView
+                android:id="@+id/text_email_profile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="user@example.com"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:padding="8dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
