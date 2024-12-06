@@ -66,9 +66,15 @@ public class Recipe_Adapter extends RecyclerView.Adapter<Recipe_Adapter.RecipeVi
                 holder.cardView.setVisibility(View.GONE);  // Ẩn nếu không phải công thức của người dùng
             } else {
                 holder.cardView.setVisibility(View.VISIBLE);  // Hiển thị nếu là công thức của người dùng
+                if (holder.btnDelete != null) {
+                    holder.btnDelete.setVisibility(View.VISIBLE);  // Hiển thị nút xóa nếu không null
+                }
             }
         } else {
             holder.cardView.setVisibility(View.VISIBLE);  // Hiển thị tất cả công thức trên trang chủ
+            if (holder.btnDelete != null) {
+                holder.btnDelete.setVisibility(View.GONE);  // Ẩn nút xóa trên trang chủ
+            }
         }
 
         // Cập nhật thông tin công thức trên card
@@ -83,11 +89,12 @@ public class Recipe_Adapter extends RecyclerView.Adapter<Recipe_Adapter.RecipeVi
             Log.e("Recipe_Adapter", "recipeServings is null");
         }
 
-        // Hiển thị tên người đăng nếu có, nếu không thì hiển thị email
-        String userInfo = recipe.getUsername() != null && !recipe.getUsername().isEmpty()
-                ? recipe.getUsername()
-                : recipe.getUserEmail();
-        holder.recipeUsername.setText("Người đăng: " + userInfo);
+        // Hiển thị tên người đăng
+        if (recipe.getUserEmail() != null) {
+            fetchUserNameByEmail(recipe.getUserEmail(), holder.recipeUsername);
+        } else {
+            holder.recipeUsername.setText("Người đăng: Không rõ");
+        }
 
         // Tải hình ảnh từ URL bằng Glide
         Glide.with(context)
@@ -107,17 +114,14 @@ public class Recipe_Adapter extends RecyclerView.Adapter<Recipe_Adapter.RecipeVi
             context.startActivity(intent);
         });
 
-        // Hiển thị nút xóa nếu ở trang Library và công thức là của người dùng
-        if (layoutId == R.layout.fragment_item_recipe && holder.btnDelete != null) {
-            holder.btnDelete.setVisibility(View.VISIBLE);
+        // Xử lý sự kiện xóa công thức nếu ở Library
+        if (!isHomePage && holder.btnDelete != null) {
             holder.btnDelete.setOnClickListener(v -> {
                 deleteRecipeFromFirebase(recipe.getRecipeName());
                 recipeList.remove(position);
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position, recipeList.size());
             });
-        } else if (holder.btnDelete != null) {
-            holder.btnDelete.setVisibility(View.GONE);  // Ẩn nút xóa ở trang chủ
         }
 
         // Đặt màu nền ngẫu nhiên cho card view
@@ -134,6 +138,32 @@ public class Recipe_Adapter extends RecyclerView.Adapter<Recipe_Adapter.RecipeVi
         holder.cardView.setCardBackgroundColor(randomColor);
     }
 
+    private void fetchUserNameByEmail(String email, TextView textView) {
+        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+        usersRef.orderByChild("email").equalTo(email).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        String userName = snapshot.child("name").getValue(String.class);
+                        if (userName != null && !userName.isEmpty()) {
+                            textView.setText("Người đăng: " + userName);
+                        } else {
+                            textView.setText("Người đăng: " + email); // Fallback to email if name is not available
+                        }
+                    }
+                } else {
+                    textView.setText("Người đăng: " + email); // Fallback if user not found
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e("Recipe_Adapter", "Error fetching user name: " + databaseError.getMessage());
+                textView.setText("Người đăng: " + email); // Fallback in case of error
+            }
+        });
+    }
 
     private void deleteRecipeFromFirebase(String recipeName) {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("recipes");
@@ -147,7 +177,7 @@ public class Recipe_Adapter extends RecyclerView.Adapter<Recipe_Adapter.RecipeVi
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle error during deletion
+                Log.e("Recipe_Adapter", "Error deleting recipe: " + databaseError.getMessage());
             }
         });
     }
@@ -169,12 +199,15 @@ public class Recipe_Adapter extends RecyclerView.Adapter<Recipe_Adapter.RecipeVi
             recipeName = itemView.findViewById(R.id.recipe_name);
             recipeDescription = itemView.findViewById(R.id.recipe_description);
             recipeCountry = itemView.findViewById(R.id.recipe_country);
-            recipeServings = itemView.findViewById(R.id.text_servings); // Đ
+            recipeServings = itemView.findViewById(R.id.text_servings);
             recipeUsername = itemView.findViewById(R.id.recipe_username);
-            btnDelete = itemView.findViewById(R.id.btnDelete);
+            btnDelete = itemView.findViewById(R.id.btnDelete); // Có thể bị null nếu layout không chứa ID này
             cardView = itemView.findViewById(R.id.cardView);
+
+            // Kiểm tra null và log lỗi
+            if (recipeImage == null) Log.e("RecipeViewHolder", "recipeImage is null");
+            if (recipeName == null) Log.e("RecipeViewHolder", "recipeName is null");
+            if (btnDelete == null) Log.e("RecipeViewHolder", "btnDelete is null");
         }
     }
 }
-
-
