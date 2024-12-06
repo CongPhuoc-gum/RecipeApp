@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "268426489916",
+    "firebase_url": "https://recipe-app-f788b-default-rtdb.firebaseio.com",
     "project_id": "recipe-app-f788b",
     "storage_bucket": "recipe-app-f788b.firebasestorage.app"
   },

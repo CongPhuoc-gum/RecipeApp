@@ -3,6 +3,7 @@ package com.example.foodrecipeapp.adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,18 +13,18 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.foodrecipeapp.ChatActivity;
 import com.example.foodrecipeapp.R;
 import com.example.foodrecipeapp.model.UserModel;
-import com.example.foodrecipeapp.utils.AndroidUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SearchUserRecyclerAdapter extends RecyclerView.Adapter<SearchUserRecyclerAdapter.UserModelViewHolder> {
 
-    private List<UserModel> userList = new ArrayList<>();
-    private Context context;
+    private final List<UserModel> userList = new ArrayList<>();
+    private final Context context;
 
     public SearchUserRecyclerAdapter(Context context) {
         this.context = context;
@@ -32,7 +33,7 @@ public class SearchUserRecyclerAdapter extends RecyclerView.Adapter<SearchUserRe
     @NonNull
     @Override
     public UserModelViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.search_user_recycler_row, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.search_user_recycler_row, parent, false);
         return new UserModelViewHolder(view);
     }
 
@@ -42,16 +43,20 @@ public class SearchUserRecyclerAdapter extends RecyclerView.Adapter<SearchUserRe
         holder.usernameText.setText(user.getName());
         holder.emailText.setText(user.getEmail());
 
-        if (!user.getProfileImage().isEmpty()) {
-            Uri imageUri = Uri.parse(user.getProfileImage());
-            AndroidUtil.setProfilePic(context, imageUri, holder.profilePic);
-        }
+        // Sử dụng Glide để load ảnh
+        Glide.with(context)
+                .load(user.getProfileImage())
+                .placeholder(R.drawable.image_profile) // Ảnh mặc định nếu link ảnh trống
+                .circleCrop()
+                .into(holder.profilePic);
 
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, ChatActivity.class);
-            AndroidUtil.passUserModelAsIntent(intent, user);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra("otherUser", user); // Truyền đúng key
             context.startActivity(intent);
+
+            // Log kiểm tra
+            Log.d("SearchUserAdapter", "Opening ChatActivity with user: " + user.getName());
         });
     }
 
@@ -60,11 +65,10 @@ public class SearchUserRecyclerAdapter extends RecyclerView.Adapter<SearchUserRe
         return userList.size();
     }
 
-    // Phương thức cập nhật dữ liệu mới
     public void updateData(List<UserModel> newUserList) {
         userList.clear();
         userList.addAll(newUserList);
-        notifyDataSetChanged(); // Cập nhật RecyclerView
+        notifyDataSetChanged();
     }
 
     class UserModelViewHolder extends RecyclerView.ViewHolder {

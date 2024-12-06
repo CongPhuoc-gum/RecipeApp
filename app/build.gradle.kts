@@ -32,10 +32,22 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+    packaging {
+        resources {
+            excludes += "META-INF/DEPENDENCIES"
+            excludes += "META-INF/LICENSE"
+            excludes += "META-INF/LICENSE.txt"
+            excludes += "META-INF/NOTICE"
+            excludes += "META-INF/NOTICE.txt"
+            excludes += "META-INF/ASL2.0"
+        }
+    }
 }
 
 dependencies {
     implementation("com.github.bumptech.glide:glide:4.15.1")
+    implementation(libs.firebase.messaging)
+    implementation(libs.firebase.messaging)
     annotationProcessor("com.github.bumptech.glide:compiler:4.15.1") // Nếu sử dụng Kotlin
 
     implementation ("com.github.bumptech.glide:glide:4.15.1")
@@ -58,6 +70,11 @@ dependencies {
     // Glide for image loading
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("com.github.dhaval2404:imagepicker:2.1")
-   
+
+    implementation("com.google.guava:guava:32.0.1-android")
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.19.0")
+
+    implementation ("com.android.volley:volley:1.2.1")
+
 
 }

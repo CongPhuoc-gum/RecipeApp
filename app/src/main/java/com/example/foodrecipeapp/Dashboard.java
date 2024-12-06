@@ -1,6 +1,7 @@
 package com.example.foodrecipeapp;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 
 import androidx.activity.EdgeToEdge;
@@ -13,7 +14,10 @@ import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.foodrecipeapp.fragment.ViewPaperAdapter;
+import com.example.foodrecipeapp.utils.FirebaseUtil;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class Dashboard extends AppCompatActivity {
 
@@ -91,5 +95,34 @@ public class Dashboard extends AppCompatActivity {
                 return false;
             }
         });
+        getFCMToken();
+    }
+    void getFCMToken() {
+        FirebaseMessaging.getInstance().getToken()
+                .addOnSuccessListener(token -> {
+                    Log.d("FCM_TOKEN", "FCM Token: " + token);
+
+                    // Lấy UID người dùng hiện tại từ FirebaseUtil
+                    String userId = FirebaseUtil.currentUserId();  // Sử dụng phương thức currentUserId() từ FirebaseUtil
+
+                    // Kiểm tra xem người dùng đã đăng nhập hay chưa
+                    if (userId != null) {
+                        // Thêm FCM token vào Realtime Database
+                        DatabaseReference userRef = FirebaseUtil.currentUserDetails();  // Lấy tham chiếu đến thông tin người dùng
+                        userRef.child("fcmToken").setValue(token)
+                                .addOnCompleteListener(task -> {
+                                    if (task.isSuccessful()) {
+                                        Log.d("FCM_TOKEN", "FCM token added to database");
+                                    } else {
+                                        Log.e("FCM_TOKEN", "Failed to add FCM token to database");
+                                    }
+                                });
+                    } else {
+                        Log.e("FCM_TOKEN", "User is not logged in");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("FCM_TOKEN", "Failed to get token", e);
+                });
     }
 }

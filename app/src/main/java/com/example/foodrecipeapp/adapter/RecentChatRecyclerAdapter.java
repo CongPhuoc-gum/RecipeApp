@@ -2,11 +2,13 @@ package com.example.foodrecipeapp.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -76,17 +78,33 @@ public class RecentChatRecyclerAdapter extends RecyclerView.Adapter<RecentChatRe
 
                                     // Thêm sự kiện click để mở ChatActivity
                                     holder.itemView.setOnClickListener(v -> {
-                                        Intent intent = new Intent(context, ChatActivity.class);
-                                        AndroidUtil.passUserModelAsIntent(intent, otherUser);  // Truyền đối tượng UserModel
-                                        context.startActivity(intent);
+                                        if (otherUserId != null) {
+                                            Intent intent = new Intent(context, ChatActivity.class);
+                                            intent.putExtra("otherUser", otherUser); // Chuyển đối tượng UserModel
+                                            context.startActivity(intent);
+                                        } else {
+                                            Toast.makeText(context, "Cannot open chat. User ID is null.", Toast.LENGTH_SHORT).show();
+                                        }
                                     });
+                                } else {
+
                                 }
+                            } else {
+                                Toast.makeText(context, "Error loading user", Toast.LENGTH_SHORT).show();
                             }
                         });
             }
         }
 
-        holder.lastMessageText.setText(chatroom.getLastMessage());
+        if (FirebaseUtil.currentUserId().equals(chatroom.getLastMessageSenderId())) {
+            // Tin nhắn do người dùng gửi
+            holder.lastMessageText.setText("Bạn: " + chatroom.getLastMessage());
+            holder.lastMessageText.setTypeface(null, android.graphics.Typeface.NORMAL); // Bình thường
+        } else {
+            // Tin nhắn từ người khác
+            holder.lastMessageText.setText(chatroom.getLastMessage());
+            holder.lastMessageText.setTypeface(null, android.graphics.Typeface.BOLD); // In đậm
+        }
 
         // Kiểm tra và định dạng thời gian tin nhắn
         if (chatroom.getLastMessageTimestamp() instanceof Long) {

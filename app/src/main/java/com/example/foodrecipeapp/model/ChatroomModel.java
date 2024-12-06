@@ -1,6 +1,7 @@
 package com.example.foodrecipeapp.model;
 
 import java.util.List;
+import java.util.Map;
 
 public class ChatroomModel {
     private String chatroomId;
@@ -8,16 +9,18 @@ public class ChatroomModel {
     private Object lastMessageTimestamp;
     private String lastMessageSenderId;
     private String lastMessage;
+    private Map<String, ChatMessageModel> chats; // Thêm trường này
 
     public ChatroomModel() {
     }
 
-    public ChatroomModel(String chatroomId, List<String> userIds, Object lastMessageTimestamp, String lastMessageSenderId, String lastMessage) {
+    public ChatroomModel(String chatroomId, List<String> userIds, Object lastMessageTimestamp, String lastMessageSenderId, String lastMessage, Map<String, ChatMessageModel> chats) {
         this.chatroomId = chatroomId;
         this.userIds = userIds;
         this.lastMessageTimestamp = lastMessageTimestamp;
         this.lastMessageSenderId = lastMessageSenderId;
         this.lastMessage = lastMessage;
+        this.chats = chats; // Gán giá trị cho chats
     }
 
     public String getChatroomId() {
@@ -58,5 +61,13 @@ public class ChatroomModel {
 
     public void setLastMessage(String lastMessage) {
         this.lastMessage = lastMessage;
+    }
+
+    public Map<String, ChatMessageModel> getChats() {
+        return chats;
+    }
+
+    public void setChats(Map<String, ChatMessageModel> chats) {
+        this.chats = chats;
     }
 }

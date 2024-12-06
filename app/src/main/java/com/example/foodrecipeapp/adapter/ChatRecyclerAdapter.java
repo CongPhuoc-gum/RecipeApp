@@ -19,17 +19,21 @@ import java.util.List;
 
 public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapter.ChatModelViewHolder> {
 
-    private List<ChatMessageModel> userList = new ArrayList<>();
-    private Context context;
+    private final List<ChatMessageModel> userList;
+    private final Context context;
 
+    // Constructor
     public ChatRecyclerAdapter(Context context, List<ChatMessageModel> chatMessages) {
         this.context = context;
-        this.userList = chatMessages;
+        this.userList = chatMessages != null ? chatMessages : new ArrayList<>();
     }
 
+    // Phương thức cập nhật dữ liệu
     public void updateData(List<ChatMessageModel> newMessages) {
         userList.clear();
-        userList.addAll(newMessages);
+        if (newMessages != null) {
+            userList.addAll(newMessages);
+        }
         notifyDataSetChanged();
     }
 
@@ -43,6 +47,7 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
     @Override
     public void onBindViewHolder(@NonNull ChatModelViewHolder holder, int position) {
         ChatMessageModel model = userList.get(position);
+
         if (model.getSenderId().equals(FirebaseUtil.currentUserId())) {
             holder.leftChatLayout.setVisibility(View.GONE);
             holder.rightChatLayout.setVisibility(View.VISIBLE);
@@ -59,7 +64,7 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
         return userList.size();
     }
 
-    class ChatModelViewHolder extends RecyclerView.ViewHolder {
+    static class ChatModelViewHolder extends RecyclerView.ViewHolder {
 
         LinearLayout leftChatLayout, rightChatLayout;
         TextView leftChatTextview, rightChatTextview;

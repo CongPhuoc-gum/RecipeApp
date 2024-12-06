@@ -1,24 +1,30 @@
 package com.example.foodrecipeapp.model;
 
-public class UserModel {
+import android.os.Parcelable;
+
+import java.io.Serializable;
+
+public class UserModel implements Serializable  {
     private String email;
     private String name;
     private String profileImage;
     private long timestamp;
     private String uid;
     private String userType;
+    private String fcmToken;
 
     public UserModel() {
         // Constructor rỗng để Firebase sử dụng khi lấy dữ liệu
     }
 
-    public UserModel(String email, String name, String profileImage, long timestamp, String uid, String userType) {
+    public UserModel(String email, String name, String profileImage, long timestamp, String uid, String userType,String fcmToken) {
         this.email = email;
         this.name = name;
         this.profileImage = profileImage;
         this.timestamp = timestamp;
         this.uid = uid;
         this.userType = userType;
+        this.fcmToken = fcmToken;
     }
 
     public String getEmail() {
@@ -67,5 +73,9 @@ public class UserModel {
 
     public void setUserType(String userType) {
         this.userType = userType;
+    }
+
+    public String getFcmToken() {
+        return fcmToken;
     }
 }
