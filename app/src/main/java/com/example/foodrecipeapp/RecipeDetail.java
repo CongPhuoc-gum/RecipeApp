@@ -44,8 +44,8 @@ public class RecipeDetail extends AppCompatActivity {
         TextView steps = findViewById(R.id.text_steps);
         ImageView recipeImage = findViewById(R.id.image_recipe);
         TextView country = findViewById(R.id.text_country);
-        TextView servings = findViewById(R.id.text_servings); // New TextView
-        TextView postedBy = findViewById(R.id.text_posted_by); // New TextView
+        TextView servings = findViewById(R.id.text_servings); // Khẩu phần
+        TextView postedBy = findViewById(R.id.recipe_username); // Người đăng
 
         // Lấy dữ liệu từ Intent
         Intent intent = getIntent();
@@ -55,8 +55,8 @@ public class RecipeDetail extends AppCompatActivity {
         String step = intent.getStringExtra("steps");
         String imageUrl = intent.getStringExtra("imageUrl");
         String recipeCountry = intent.getStringExtra("country");
-        String recipeServings = intent.getStringExtra("servings"); // New data
-        String postedByUser = intent.getStringExtra("postedBy"); // New data
+        String recipeServings = intent.getStringExtra("servings"); // Khẩu phần
+        String postedByUser = intent.getStringExtra("userName"); // Người đăng
 
         // Hiển thị dữ liệu
         title.setText(recipeName != null ? recipeName : "Tên công thức không có");
@@ -64,8 +64,10 @@ public class RecipeDetail extends AppCompatActivity {
         ingredients.setText(ing != null ? ing : "Thành phần chưa được cung cấp");
         steps.setText(step != null ? step : "Hướng dẫn chưa được cung cấp");
         country.setText(recipeCountry != null ? "Quốc gia: " + recipeCountry : "Quốc gia không xác định");
-        servings.setText(recipeServings != null ? "Khẩu phần: " + recipeServings : "Khẩu phần không xác định"); // Set servings
-        postedBy.setText(postedByUser != null ? "Người đăng: " + postedByUser : "Người đăng không xác định"); // Set posted by
+
+        // Hiển thị khẩu phần và người đăng với kiểm tra null
+        servings.setText(recipeServings != null && !recipeServings.isEmpty() ? "Khẩu phần: " + recipeServings : "Khẩu phần không xác định");
+        postedBy.setText(postedByUser != null && !postedByUser.isEmpty() ? "Người đăng: " + postedByUser : "Người đăng không xác định");
 
         // Load ảnh từ URL (sử dụng Glide)
         Glide.with(this).load(imageUrl).into(recipeImage);
