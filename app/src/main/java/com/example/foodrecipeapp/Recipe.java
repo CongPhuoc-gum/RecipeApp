@@ -1,7 +1,8 @@
 package com.example.foodrecipeapp;
 
 public class Recipe {
-    private String recipeName;
+    private String recipeId;
+    private String name;
     private String description;
     private String ingredients;
     private String steps;
@@ -9,17 +10,20 @@ public class Recipe {
     private String cookingTime;
     private String servings;
     private String country;
-    private String userEmail;
     private String userName;
+    private String userUid;
 
-    // Constructor không tham số (Firebase yêu cầu)
-    public Recipe() {}
+    // Constructor không tham số
+    public Recipe() {
+        // Constructor mặc định cần thiết cho Firebase
+    }
 
-    // Constructor đầy đủ
-    public Recipe(String recipeName, String description, String ingredients, String steps,
+    // Constructor có tham số bao gồm recipeId
+    public Recipe(String recipeId, String name, String description, String ingredients, String steps,
                   String imageUrl, String cookingTime, String servings, String country,
-                  String userEmail, String username) {
-        this.recipeName = recipeName;
+                  String userName, String userUid) {
+        this.recipeId = recipeId;
+        this.name = name;
         this.description = description;
         this.ingredients = ingredients;
         this.steps = steps;
@@ -27,17 +31,25 @@ public class Recipe {
         this.cookingTime = cookingTime;
         this.servings = servings;
         this.country = country;
-        this.userEmail = userEmail;
         this.userName = userName;
+        this.userUid = userUid;
     }
 
-    // Getter và Setter
-    public String getRecipeName() {
-        return recipeName;
+    // Các phương thức getter và setter cho các trường
+    public String getRecipeId() {
+        return recipeId;
     }
 
-    public void setRecipeName(String recipeName) {
-        this.recipeName = recipeName;
+    public void setRecipeId(String recipeId) {
+        this.recipeId = recipeId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {
@@ -96,21 +108,19 @@ public class Recipe {
         this.country = country;
     }
 
-    public String getUserEmail() {
-        return userEmail;
-    }
-
-    public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
-    }
-
-    public String getUsername() {
+    public String getUserName() {
         return userName;
     }
 
-    public void setUsername(String username) {
-        this.userName = username;
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getUserUid() {
+        return userUid;
+    }
+
+    public void setUserUid(String userUid) {
+        this.userUid = userUid;
     }
 }
-
-

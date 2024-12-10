@@ -27,8 +27,7 @@
             android:name=".ActivityProfile"
             android:exported="false" />
         <activity
-            android:name=".RecipeDetail"
-            android:exported="false" />
+            android:name=".RecipeDetail"/>
         <activity
             android:name=".AddRecipe"
             android:exported="false" />

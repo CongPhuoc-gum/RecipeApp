@@ -65,7 +65,7 @@
                 android:id="@+id/text_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Banh Mi "
+                android:text="Banh Mi"
                 android:textSize="24sp"
                 android:fontFamily="@font/abeezee"
                 android:textStyle="bold"
@@ -111,10 +111,10 @@
             </LinearLayout>
 
             <TextView
+                android:id="@+id/text_description"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Mo Ta"
-                android:id="@+id/text_description"
                 android:textSize="18sp"
                 android:fontFamily="@font/abeezee"
                 android:paddingTop="8dp"
@@ -144,7 +144,6 @@
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:textColor="@color/orange_bright" />
-
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -162,7 +161,7 @@
                 android:id="@+id/text_ingredients"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Danh sách thành phâần"
+                android:text="Danh sách thành phần"
                 android:textSize="14sp"
                 android:paddingTop="8dp" />
 
@@ -179,7 +178,7 @@
                 android:id="@+id/text_steps"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="List Qua Trinh"
+                android:text="List Quá Trình"
                 android:textSize="14sp"
                 android:paddingTop="8dp" />
         </LinearLayout>

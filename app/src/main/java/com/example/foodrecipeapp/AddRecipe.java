@@ -1,8 +1,6 @@
 package com.example.foodrecipeapp;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -16,52 +14,60 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import java.io.ByteArrayOutputStream;
-
 public class AddRecipe extends AppCompatActivity {
 
-    ImageButton btn_back;
     private static final int PICK_IMAGE_REQUEST = 1;
+
+    private ImageButton btn_back;
     private Uri imageUri;
     private ImageView selectedImageView;
     private EditText inputRecipeName, inputDescription, inputIngredients, inputSteps;
-    private DatabaseReference recipeRef;
-    private StorageReference storageReference;
     private Spinner spinnerCookingTime, spinnerServings, spinnerCountry;
-    private FirebaseUser currentUser;
+    private DatabaseReference recipeRef, usersRef;
+    private StorageReference storageReference;
     private FirebaseAuth mAuth;
-
-
+    private FirebaseUser currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_add_recipe);
-        btn_back = findViewById(R.id.btn_back);
 
+        // Firebase setup
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
-
-        // Khởi tạo Firebase references
-        // Initialize Firebase references
-        recipeRef = FirebaseDatabase.getInstance().getReference("recipes");
+        recipeRef = FirebaseDatabase.getInstance().getReference("Recipes");
+        usersRef = FirebaseDatabase.getInstance().getReference("Users"); // Reference to "Users"
         storageReference = FirebaseStorage.getInstance().getReference("images");
 
-        // Khởi tạo các view
+        // Giao diện
+        initializeUI();
+
+        // Xử lý nút "Thêm Ảnh"
+        findViewById(R.id.btn_add_image).setOnClickListener(view -> openFileChooser());
+
+        // Xử lý nút "Submit"
+        findViewById(R.id.button_submit).setOnClickListener(view -> uploadRecipeData());
+
+        // Xử lý nút "Back"
+        btn_back.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
+    }
+
+    private void initializeUI() {
+        btn_back = findViewById(R.id.btn_back);
         selectedImageView = findViewById(R.id.selected_image);
         inputRecipeName = findViewById(R.id.input_recipe_name);
         inputDescription = findViewById(R.id.input_description);
@@ -71,70 +77,42 @@ public class AddRecipe extends AppCompatActivity {
         spinnerServings = findViewById(R.id.spinner_servings);
         spinnerCountry = findViewById(R.id.spinner_country);
 
-        Button btnAddimage = findViewById(R.id.btn_add_image);
-        Button btnSubmit = findViewById(R.id.button_submit);
-
         setUpSpinners();
-
-        // Chọn ảnh từ gallery
-        btnAddimage.setOnClickListener(view -> openFileChooser());
-
-        // Gửi công thức lên Firebase
-        btnSubmit.setOnClickListener(view -> uploadRecipeData());
-
-
-        btn_back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getOnBackPressedDispatcher().onBackPressed();
-            }
-        });
-
     }
 
     private void setUpSpinners() {
-        // Cooking time options
+        // Spinner for Cooking Time
         String[] cookingTimes = {"10 phút", "20 phút", "30 phút", "40 phút", "50 phút"};
-        ArrayAdapter<String> cookingTimeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, cookingTimes);
-        cookingTimeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerCookingTime.setAdapter(cookingTimeAdapter);
-        spinnerCookingTime.setSelection(0);
+        setUpSpinner(spinnerCookingTime, cookingTimes);
 
-        // Servings options
+        // Spinner for Servings
         String[] servings = {"1 người", "2 người", "4 người", "6 người"};
-        ArrayAdapter<String> servingsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, servings);
-        servingsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerServings.setAdapter(servingsAdapter);
-        spinnerServings.setSelection(0);
+        setUpSpinner(spinnerServings, servings);
 
-        // Country options
-        String[] countries = {"Việt Nam", "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda",
-                "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh",
-                "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina",
-                "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon",
-                "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo",
-                "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica",
-                "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia",
-                "Eswatini", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana",
-                "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary",
-                "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan",
-                "Kazakhstan", "Kenya", "Kiribati", "Korea (North)", "Korea (South)", "Kuwait", "Kyrgyzstan", "Laos", "Latvia",
-                "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi",
-                "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia",
-                "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal",
-                "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Macedonia", "Norway", "Oman", "Pakistan",
-                "Palau", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar",
-                "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines",
-                "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone",
-                "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain",
-                "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand",
-                "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda",
-                "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu",
-                "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"};
-        ArrayAdapter<String> countryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, countries);
-        countryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerCountry.setAdapter(countryAdapter);
-        spinnerCountry.setSelection(0);
+        // Spinner for Country
+        String[] countries = {"Việt Nam", "Afghanistan", "Albania", "Algeria", "Argentina", "Australia"};
+        setUpSpinner(spinnerCountry, countries);
+    }
+
+    private void setUpSpinner(Spinner spinner, String[] data) {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, data);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+    }
+
+    private void openFileChooser() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        startActivityForResult(intent, PICK_IMAGE_REQUEST);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            imageUri = data.getData();
+            selectedImageView.setImageURI(imageUri);
+        }
     }
 
     private void uploadRecipeData() {
@@ -146,121 +124,71 @@ public class AddRecipe extends AppCompatActivity {
         String servings = spinnerServings.getSelectedItem().toString();
         String country = spinnerCountry.getSelectedItem().toString();
 
-        // Lấy tên người dùng từ Firebase Authentication
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        final String userEmail;  // Declare as final
-        final String username;    // Declare for username
-
-        if (currentUser != null) {
-            userEmail = currentUser.getEmail();
-            username = currentUser.getDisplayName();  // Retrieve display name
-        } else {
-            userEmail = "Unknown";  // Default value if user is not logged in
-            username = "Anonymous"; // Default username
-        }
-
-        if (recipeName.isEmpty() || description.isEmpty() || ingredients.isEmpty() || steps.isEmpty() || imageUri == null) {
-            Toast.makeText(this, "Vui lòng điền đủ thông tin và chọn ảnh!", Toast.LENGTH_SHORT).show();
+        if (currentUser == null) {
+            Toast.makeText(this, "Bạn cần đăng nhập để thêm công thức!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Tiến hành tải ảnh lên Firebase và lưu công thức
-        String fileName = System.currentTimeMillis() + ".jpg";
-        StorageReference fileReference = storageReference.child(fileName);
+        String userUid = currentUser.getUid();
 
-        fileReference.putFile(imageUri)
-                .addOnSuccessListener(taskSnapshot -> fileReference.getDownloadUrl()
-                        .addOnSuccessListener(uri -> {
-                            String imageUrl = uri.toString();  // Lấy URL ảnh dưới dạng String
-                            Recipe recipe = new Recipe(recipeName, description, ingredients, steps, imageUrl, cookingTime, servings, country, userEmail, username);  // Include username
-                            saveRecipeToDatabase(recipe);
-                        })
-                        .addOnFailureListener(e -> {
-                            Toast.makeText(this, "Lỗi khi lấy URL ảnh!", Toast.LENGTH_SHORT).show();
-                            e.printStackTrace();
-                        }))
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Lỗi tải ảnh lên Firebase!", Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
-                });
-    }
-
-
-
-    private void saveRecipeToDatabase(Recipe recipe) {
-        String recipeId = recipeRef.push().getKey();
-        if (recipeId != null) {
-            recipeRef.child(recipeId).setValue(recipe)
-                    .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(AddRecipe.this, "Công thức đã được lưu!", Toast.LENGTH_SHORT).show();
-                        // Chuyển sang màn hình chi tiết công thức
-                        Intent intent = new Intent(AddRecipe.this, RecipeDetail.class);
-                        intent.putExtra("recipeName", recipe.getRecipeName());
-                        intent.putExtra("description", recipe.getDescription());
-                        intent.putExtra("ingredients", recipe.getIngredients());
-                        intent.putExtra("steps", recipe.getSteps());
-                        intent.putExtra("imageUrl", recipe.getImageUrl());
-                        intent.putExtra("cookingTime", recipe.getCookingTime());
-                        intent.putExtra("servings", recipe.getServings());
-                        intent.putExtra("country", recipe.getCountry()); // Thêm country vào Intent
-                        startActivity(intent);
-                        finish();
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(AddRecipe.this, "Lỗi khi lưu công thức!", Toast.LENGTH_SHORT).show();
-                    });
-        }
-    }
-
-    private void openFileChooser() {
-        CharSequence[] options = {"Chụp ảnh", "Chọn từ thư viện", "Hủy"};
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Chọn ảnh");
-        builder.setItems(options, (dialog, which) -> {
-            if (options[which].equals("Chụp ảnh")) {
-                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                    startActivityForResult(takePictureIntent, PICK_IMAGE_REQUEST);
+        // Fetch the username from the Users node in Firebase Realtime Database
+        usersRef.child(userUid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String userName = dataSnapshot.child("name").getValue(String.class);
+                if (userName == null) {
+                    userName = "Không rõ";  // Default name if not found
                 }
-            } else if (options[which].equals("Chọn từ thư viện")) {
-                Intent pickPhotoIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                pickPhotoIntent.setType("image/*");
-                startActivityForResult(pickPhotoIntent, PICK_IMAGE_REQUEST);
-            } else {
-                dialog.dismiss();
+
+                if (recipeName.isEmpty() || description.isEmpty() || ingredients.isEmpty() || steps.isEmpty() || imageUri == null) {
+                    Toast.makeText(AddRecipe.this, "Vui lòng điền đầy đủ thông tin và chọn ảnh!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                String recipeId = recipeRef.push().getKey(); // Generate unique recipe ID
+                String fileName = System.currentTimeMillis() + ".jpg";
+                StorageReference fileReference = storageReference.child(fileName);
+
+                // Upload image to Firebase Storage
+                String finalUserName = userName;
+                fileReference.putFile(imageUri)
+                        .addOnSuccessListener(taskSnapshot -> fileReference.getDownloadUrl()
+                                .addOnSuccessListener(uri -> {
+                                    String imageUrl = uri.toString();
+                                    Recipe recipe = new Recipe(recipeId, recipeName, description, ingredients, steps, imageUrl, cookingTime, servings, country, finalUserName, userUid);
+                                    saveRecipeToDatabase(recipe);
+                                })
+                                .addOnFailureListener(e -> Toast.makeText(AddRecipe.this, "Không thể lấy URL ảnh!", Toast.LENGTH_SHORT).show()))
+                        .addOnFailureListener(e -> Toast.makeText(AddRecipe.this, "Tải ảnh lên thất bại!", Toast.LENGTH_SHORT).show());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(AddRecipe.this, "Lỗi khi lấy thông tin người dùng!", Toast.LENGTH_SHORT).show();
             }
         });
-        builder.show();
     }
 
+    private void saveRecipeToDatabase(Recipe recipe) {
+        // Use Firebase's `push()` method to generate a unique recipeId
+        String recipeId = recipeRef.push().getKey(); // Generates a unique ID for the recipe
 
+        if (recipeId != null) {
+            recipe.setRecipeId(recipeId); // Set the generated recipeId to the recipe object
 
-    // Nhận kết quả từ activity chọn ảnh
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+            // Save the recipe to the database
+            recipeRef.child(recipeId).setValue(recipe)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(AddRecipe.this, "Công thức đã được lưu thành công!", Toast.LENGTH_SHORT).show();
 
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK) {
-            if (data != null && data.getData() != null) {
-                // Ảnh từ thư viện
-                imageUri = data.getData();
-                selectedImageView.setImageURI(imageUri);
-            } else if (data != null && data.getExtras() != null) {
-                // Ảnh từ camera
-                Bitmap photo = (Bitmap) data.getExtras().get("data");
-                if (photo != null) {
-                    selectedImageView.setImageBitmap(photo);
-                    imageUri = getImageUriFromBitmap(photo);
-                }
-            }
+                        // Now that the recipe is saved, navigate to RecipeDetail directly
+                        Intent intent = new Intent(AddRecipe.this, RecipeDetail.class);
+                        intent.putExtra("recipeId", recipeId);  // Only pass the recipeId to fetch data in RecipeDetail
+                        startActivity(intent);  // Open RecipeDetail activity
+                        finish();  // Close AddRecipe activity
+                    })
+                    .addOnFailureListener(e -> Toast.makeText(AddRecipe.this, "Lưu công thức thất bại!", Toast.LENGTH_SHORT).show());
         }
-    }
-
-    private Uri getImageUriFromBitmap(Bitmap bitmap) {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-        String path = MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "CameraImage", null);
-        return Uri.parse(path);
     }
 
 }
