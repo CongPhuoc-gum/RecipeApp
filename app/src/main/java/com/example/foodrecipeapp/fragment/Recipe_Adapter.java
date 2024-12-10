@@ -165,6 +165,7 @@ public class Recipe_Adapter extends RecyclerView.Adapter<Recipe_Adapter.RecipeVi
         });
     }
 
+
     private void fetchUserNameByUid(String userUid, TextView textView) {
         DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
         usersRef.child(userUid).addListenerForSingleValueEvent(new ValueEventListener() {

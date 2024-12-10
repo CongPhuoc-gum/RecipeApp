@@ -1,7 +1,5 @@
 package com.example.foodrecipeapp.fragment;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -25,13 +23,12 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class FragmentFavorites extends Fragment {
     private RecyclerView recyclerView;
     private Recipe_Adapter adapter;
     private List<Recipe> favoriteRecipes;
-    private DatabaseReference favoritesRef;
+    private DatabaseReference favoritesRef, recipesRef;
 
     public FragmentFavorites() {
         // Required empty public constructor
@@ -49,9 +46,10 @@ public class FragmentFavorites extends Fragment {
         adapter = new Recipe_Adapter(getContext(), favoriteRecipes, R.layout.fragment_item_recipe, false);
         recyclerView.setAdapter(adapter);
 
-        // Reference to Firebase
+        // Firebase references
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        favoritesRef = FirebaseDatabase.getInstance().getReference("users").child(userId).child("favorites");
+        favoritesRef = FirebaseDatabase.getInstance().getReference("favorites").child(userId);
+        recipesRef = FirebaseDatabase.getInstance().getReference("Recipes");
 
         loadFavorites();
 
@@ -62,14 +60,30 @@ public class FragmentFavorites extends Fragment {
         favoritesRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                favoriteRecipes.clear();
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    Recipe recipe = dataSnapshot.getValue(Recipe.class);
-                    if (recipe != null) {
-                        favoriteRecipes.add(recipe);
+                favoriteRecipes.clear(); // Clear the list to avoid duplicates
+
+                // Iterate through the user's favorite recipes
+                for (DataSnapshot favoriteSnapshot : snapshot.getChildren()) {
+                    String recipeId = favoriteSnapshot.getKey();
+                    if (recipeId != null) {
+                        // Get the recipe details by ID from the "Recipes" node
+                        recipesRef.child(recipeId).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot recipeSnapshot) {
+                                Recipe recipe = recipeSnapshot.getValue(Recipe.class);
+                                if (recipe != null) {
+                                    favoriteRecipes.add(recipe); // Add the recipe to the list
+                                    adapter.notifyDataSetChanged();
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+                                // Handle database error
+                            }
+                        });
                     }
                 }
-                adapter.notifyDataSetChanged();
             }
 
             @Override

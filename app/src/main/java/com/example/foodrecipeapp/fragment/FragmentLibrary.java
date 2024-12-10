@@ -55,9 +55,6 @@ public class FragmentLibrary extends Fragment {
         adapter = new Recipe_Adapter(getContext(), recipeList, R.layout.fragment_item_recipe, false); // Use the library layout for the RecyclerView
         recyclerView.setAdapter(adapter);
 
-        // Load recipes from Firebase
-        loadRecipesFromFirebase();
-
         // Button to add a new recipe
         btn_add_recipe = view.findViewById(R.id.btn_add_recipe);
         btn_add_recipe.setOnClickListener(view1 -> {
@@ -65,21 +62,25 @@ public class FragmentLibrary extends Fragment {
             startActivity(intent);
         });
 
+        // Load recipes from Firebase
+        loadRecipesFromFirebase();
+
         return view;
     }
 
     private void loadRecipesFromFirebase() {
-        DatabaseReference recipeRef = FirebaseDatabase.getInstance().getReference("recipes");
+        DatabaseReference recipeRef = FirebaseDatabase.getInstance().getReference("Recipes");
 
-        recipeRef.addValueEventListener(new ValueEventListener() {
+        // Query Firebase to load only the recipes where the current user's UID matches the userUid of the recipe
+        recipeRef.orderByChild("userUid").equalTo(currentUserUid).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 recipeList.clear(); // Clear old data before adding new data
 
-                // Loop through the recipes and add only the user's recipes to the list
+                // Loop through the recipes and add them to the list
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     Recipe recipe = dataSnapshot.getValue(Recipe.class);
-                    if (recipe != null && recipe.getUserUid() != null && recipe.getUserUid().equals(currentUserUid)) {
+                    if (recipe != null) {
                         recipeList.add(recipe); // Add only the user's recipes
                     }
                 }
@@ -95,4 +96,3 @@ public class FragmentLibrary extends Fragment {
         });
     }
 }
-
