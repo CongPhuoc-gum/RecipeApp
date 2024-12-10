@@ -2,7 +2,7 @@ package com.example.foodrecipeapp;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -11,6 +11,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
+import com.example.foodrecipeapp.model.UserModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -18,14 +19,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.HashMap;
-
 public class RecipeDetail extends AppCompatActivity {
     private ImageButton btnFavorite;
     private boolean isFavorite = false;
     private DatabaseReference favoritesRef;
     private String recipeId;  // Recipe ID from intent
-    private String userId;    // Current logged in user ID
+    private String userId;    // Current logged-in user ID
+    private Button btnChat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,10 +43,10 @@ public class RecipeDetail extends AppCompatActivity {
         TextView country = findViewById(R.id.text_country);
         TextView servings = findViewById(R.id.text_servings);
         TextView postedBy = findViewById(R.id.recipe_username);
+        btnChat = findViewById(R.id.btn_chat);
 
         // Get the recipeId from the intent
-        Intent intent = getIntent();
-        recipeId = intent.getStringExtra("recipeId");
+        recipeId = getIntent().getStringExtra("recipeId");
         userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         favoritesRef = FirebaseDatabase.getInstance().getReference("favorites").child(userId);
 
@@ -54,11 +54,11 @@ public class RecipeDetail extends AppCompatActivity {
             fetchRecipeDetails(recipeId, title, description, ingredients, steps, recipeImage, country, servings, postedBy);
         } else {
             Toast.makeText(this, "Invalid Recipe ID!", Toast.LENGTH_SHORT).show();
+            finish();
         }
 
         // Handle the back button
         btnBack.setOnClickListener(v -> onBackPressed());
-
         // Handle the favorite button
         btnFavorite.setOnClickListener(v -> toggleFavorite());
     }
@@ -80,6 +80,9 @@ public class RecipeDetail extends AppCompatActivity {
                         servings.setText("Khẩu phần: " + recipe.getServings());
                         postedBy.setText("Người đăng: " + recipe.getUserName());
 
+                        // Set chat button to start chat activity with the correct user
+                        btnChat.setOnClickListener(v -> openChatActivity(recipe.getUserUid(), recipe.getUserName()));
+
                         // Load image with Glide
                         Glide.with(RecipeDetail.this).load(recipe.getImageUrl()).into(recipeImage);
 
@@ -88,6 +91,7 @@ public class RecipeDetail extends AppCompatActivity {
                     }
                 } else {
                     Toast.makeText(RecipeDetail.this, "Recipe not found!", Toast.LENGTH_SHORT).show();
+                    finish();
                 }
             }
 
@@ -114,11 +118,7 @@ public class RecipeDetail extends AppCompatActivity {
     }
 
     private void updateFavoriteButton() {
-        if (isFavorite) {
-            btnFavorite.setImageResource(R.drawable.heart_full);
-        } else {
-            btnFavorite.setImageResource(R.drawable.heart);
-        }
+        btnFavorite.setImageResource(isFavorite ? R.drawable.heart_full : R.drawable.heart);
     }
 
     private void toggleFavorite() {
@@ -136,10 +136,27 @@ public class RecipeDetail extends AppCompatActivity {
                         isFavorite = true;
                         updateFavoriteButton();
                         Toast.makeText(RecipeDetail.this, "Added to favorites", Toast.LENGTH_SHORT).show();
+
+
                     })
                     .addOnFailureListener(e -> Toast.makeText(RecipeDetail.this, "Failed to add to favorites", Toast.LENGTH_SHORT).show());
         }
     }
+
+    private void openChatActivity(String otherUserId, String otherUserName) {
+        if (otherUserId == null || otherUserId.isEmpty()) {
+            Toast.makeText(this, "Người dùng không hợp lệ!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Tạo đối tượng UserModel với userId và userName
+        UserModel otherUser = new UserModel();
+        otherUser.setUid(otherUserId);
+        otherUser.setName(otherUserName);
+
+        // Truyền đối tượng UserModel vào Intent
+        Intent intent = new Intent(RecipeDetail.this, ChatActivity.class);
+        intent.putExtra("otherUser", otherUser);  // Truyền toàn bộ đối tượng UserModel
+        startActivity(intent);
+    }
 }
-
-

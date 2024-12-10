@@ -3,9 +3,14 @@ package com.example.foodrecipeapp.utils;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -130,6 +135,34 @@ public class FirebaseUtil {
                 callback.onError(task.getException());
             }
         });
+    }
+    public static void getUserIdFromEmail(String email, final UserIdCallback callback) {
+        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+        usersRef.orderByChild("email").equalTo(email).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        String userId = snapshot.getKey();  // Lấy userId từ khóa của node người dùng
+                        callback.onSuccess(userId);  // Trả về userId nếu tìm thấy
+                    }
+                } else {
+                    callback.onError(new Exception("User not found"));
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                callback.onError(new Exception("Error fetching user data"));
+            }
+        });
+    }
+
+
+    // Định nghĩa callback để nhận kết quả trả về
+    public interface UserIdCallback {
+        void onSuccess(String userId);
+        void onError(Exception e);
     }
 
     public interface UserNameCallback {
