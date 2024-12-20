@@ -24,10 +24,12 @@
         android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
         tools:targetApi="31">
         <activity
-            android:name=".ActivityProfile"
+            android:name=".SendImageActivity"
             android:exported="false" />
         <activity
-            android:name=".RecipeDetail"/>
+            android:name=".ActivityProfile"
+            android:exported="false" />
+        <activity android:name=".RecipeDetail" />
         <activity
             android:name=".AddRecipe"
             android:exported="false" />

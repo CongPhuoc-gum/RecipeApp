@@ -1,12 +1,18 @@
 package com.example.foodrecipeapp;
 
+import static com.example.foodrecipeapp.ChatActivity.PICK_IMAGE_REQUEST;
+
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,13 +44,17 @@ import java.util.Map;
 
 public class ChatActivity extends AppCompatActivity {
 
+
+    public static final int PICK_IMAGE_REQUEST = 1;
+    Uri uri;
+
     private UserModel otherUser;
     private String chatroomId;
     private ChatroomModel chatroomModel;
     private ChatRecyclerAdapter adapter;
 
     private EditText messageInput;
-    private ImageButton sendMessageBtn, backBtn;
+    private ImageButton sendMessageBtn, backBtn, camBtn;
     private TextView otherUsername;
     private RecyclerView recyclerView;
     private ImageView profilePicImageView;
@@ -71,6 +81,7 @@ public class ChatActivity extends AppCompatActivity {
         otherUsername = findViewById(R.id.other_username);
         recyclerView = findViewById(R.id.chat_recycler_view);
         profilePicImageView = findViewById(R.id.profile_pic_image_view);
+        camBtn = findViewById(R.id.cam_sendmessage);
 
         otherUsername.setText(otherUser.getName());
         Glide.with(this)
@@ -87,8 +98,27 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
+        camBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("image/*");
+            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+        });
+
+
         setupChatRecyclerView();
         getOrCreateChatroomModel();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @NonNull Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            uri = data.getData();
+            sendImageMessage(uri);  // Call the send image method with the selected image URI
+        } else {
+            Toast.makeText(this, "No image selected", Toast.LENGTH_SHORT).show();
+        }
     }
 
     void setupChatRecyclerView() {
@@ -144,11 +174,40 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
+
+    private void sendImageMessage(Uri imageUri) {
+        String messageType = "image"; // Image message type
+        String imageUrl = imageUri.toString(); // You can upload image to Firebase Storage and get the URL here
+
+        ChatMessageModel chatMessageModel = new ChatMessageModel(
+                imageUrl,
+                FirebaseUtil.currentUserId(),
+                ServerValue.TIMESTAMP,
+                messageType // Set message type as image
+        );
+
+        DatabaseReference chatsRef = FirebaseUtil.getChatroomReference(chatroomId).child("chats");
+        String messageId = chatsRef.push().getKey();
+
+        if (messageId != null) {
+            chatsRef.child(messageId).setValue(chatMessageModel)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            Log.d("NewMessage", "Image message sent successfully.");
+                        } else {
+                            Log.e("NewMessage", "Failed to send image message: " + task.getException().getMessage());
+                        }
+                    });
+        }
+    }
+
     void sendMessageToUser(String message) {
+        String messageType = "text";
         Map<String, Object> chatroomUpdates = new HashMap<>();
         chatroomUpdates.put("lastMessage", message);
         chatroomUpdates.put("lastMessageSenderId", FirebaseUtil.currentUserId());
         chatroomUpdates.put("lastMessageTimestamp", ServerValue.TIMESTAMP);
+        chatroomUpdates.put("messageType", messageType);
 
         FirebaseUtil.getChatroomReference(chatroomId)
                 .updateChildren(chatroomUpdates)
@@ -164,7 +223,8 @@ public class ChatActivity extends AppCompatActivity {
         ChatMessageModel chatMessageModel = new ChatMessageModel(
                 message,
                 FirebaseUtil.currentUserId(),
-                ServerValue.TIMESTAMP
+                ServerValue.TIMESTAMP,
+                messageType
         );
 
         DatabaseReference chatsRef = FirebaseUtil.getChatroomReference(chatroomId).child("chats");
