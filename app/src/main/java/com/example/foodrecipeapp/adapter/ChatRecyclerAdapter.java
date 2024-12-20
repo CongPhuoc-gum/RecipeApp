@@ -4,12 +4,14 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.foodrecipeapp.R;
 import com.example.foodrecipeapp.model.ChatMessageModel;
 import com.example.foodrecipeapp.utils.FirebaseUtil;
@@ -51,11 +53,35 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
         if (model.getSenderId().equals(FirebaseUtil.currentUserId())) {
             holder.leftChatLayout.setVisibility(View.GONE);
             holder.rightChatLayout.setVisibility(View.VISIBLE);
-            holder.rightChatTextview.setText(model.getMessage());
+
+            if ("text".equals(model.getMessageType())) {
+                holder.rightChatTextview.setVisibility(View.VISIBLE);
+                holder.rightChatImageview.setVisibility(View.GONE);
+                holder.rightChatTextview.setText(model.getMessage());
+            } else if ("image".equals(model.getMessageType())) {
+                holder.rightChatTextview.setVisibility(View.GONE);
+                holder.rightChatImageview.setVisibility(View.VISIBLE);
+                Glide.with(context)
+                        .load(model.getMessage())  // Assuming the URL of the image
+                        .placeholder(R.drawable.placeholder_image)
+                        .into(holder.rightChatImageview);
+            }
         } else {
             holder.rightChatLayout.setVisibility(View.GONE);
             holder.leftChatLayout.setVisibility(View.VISIBLE);
-            holder.leftChatTextview.setText(model.getMessage());
+
+            if ("text".equals(model.getMessageType())) {
+                holder.leftChatTextview.setVisibility(View.VISIBLE);
+                holder.leftChatImageview.setVisibility(View.GONE);
+                holder.leftChatTextview.setText(model.getMessage());
+            } else if ("image".equals(model.getMessageType())) {
+                holder.leftChatTextview.setVisibility(View.GONE);
+                holder.leftChatImageview.setVisibility(View.VISIBLE);
+                Glide.with(context)
+                        .load(model.getMessage())  // Assuming the URL of the image
+                        .placeholder(R.drawable.placeholder_image)
+                        .into(holder.leftChatImageview);
+            }
         }
     }
 
@@ -68,6 +94,7 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
 
         LinearLayout leftChatLayout, rightChatLayout;
         TextView leftChatTextview, rightChatTextview;
+        ImageView leftChatImageview, rightChatImageview;
 
         public ChatModelViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -76,6 +103,8 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
             rightChatLayout = itemView.findViewById(R.id.right_chat_layout);
             leftChatTextview = itemView.findViewById(R.id.left_chat_textview);
             rightChatTextview = itemView.findViewById(R.id.right_chat_textview);
+            leftChatImageview = itemView.findViewById(R.id.left_chat_imageview);
+            rightChatImageview = itemView.findViewById(R.id.right_chat_imageview);
         }
     }
 }
