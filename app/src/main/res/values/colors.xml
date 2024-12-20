@@ -4,6 +4,8 @@
     <color name="background">#FFEAB6</color>
     <color name="gray_01">#757575</color>
     <color name="gray_02">#777777</color>
+    <color name="gray_03">#CCCCCC</color>
+    <color name="gray_04">#FBFBFB</color>
     <!-- Grays -->
     <color name="dark">#333333</color>
     <color name="light">#757575</color>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/shape_rect02"
+    android:padding="20dp">
+
+<!--    Button Back-->
+    <ImageButton
+        android:id="@+id/btn_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:src="@drawable/icon_back"/>
+
+<!--    TextView Dialog Title -->
+    <TextView
+        android:id="@+id/titleTextview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/dm_sans_bold"
+        android:padding="5dp"
+        android:text="Thêm Bình Luận"
+        android:textAlignment="center"
+        android:textSize="16sp"
+        android:textColor="@color/design_default_color_primary"
+        android:textStyle="bold"/>
+
+<!--    TextInputLayout: TextInputComment-->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/CommentTil"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_back"
+        android:layout_marginTop="20dp"
+        android:hint="Bình Luận!"
+        app:startIconDrawable="@drawable/ic_comment_black">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/commentEt"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/shape_logn_register"
+            android:inputType="textCapSentences|textMultiLine"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <Button
+        android:id="@+id/Btn_Submit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/CommentTil"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/shape_logn_register"
+        android:backgroundTint="@color/design_default_color_primary"
+        android:text="Đăng Lên"
+        android:textColor="@color/white"/>
+
+</RelativeLayout>

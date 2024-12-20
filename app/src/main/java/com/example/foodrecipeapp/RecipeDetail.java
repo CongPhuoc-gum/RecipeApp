@@ -1,23 +1,39 @@
 package com.example.foodrecipeapp;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.foodrecipeapp.adapter.AdapterComment;
+import com.example.foodrecipeapp.model.ModelComments;
 import com.example.foodrecipeapp.model.UserModel;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
 
 public class RecipeDetail extends AppCompatActivity {
     private ImageButton btnFavorite;
@@ -26,6 +42,11 @@ public class RecipeDetail extends AppCompatActivity {
     private String recipeId;  // Recipe ID from intent
     private String userId;    // Current logged-in user ID
     private Button btnChat;
+    private ImageButton addCommentBtn;
+    private RecyclerView commentsRv;
+    private AlertDialog alertDialog;
+    private ArrayList<ModelComments> commentsArrayList;
+    private AdapterComment adapterComment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,23 +65,127 @@ public class RecipeDetail extends AppCompatActivity {
         TextView servings = findViewById(R.id.text_servings);
         TextView postedBy = findViewById(R.id.recipe_username);
         btnChat = findViewById(R.id.btn_chat);
+        addCommentBtn = findViewById(R.id.addCommentBtn);
+        commentsRv = findViewById(R.id.commentsRv);
+
+        // Get the logged-in user ID from FirebaseAuth
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        if (auth.getCurrentUser() != null) {
+            userId = auth.getCurrentUser().getUid();
+        } else {
+            Toast.makeText(this, "User is not logged in!", Toast.LENGTH_SHORT).show();
+            finish(); // End activity if no user is logged in
+            return;
+        }
 
         // Get the recipeId from the intent
         recipeId = getIntent().getStringExtra("recipeId");
-        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        favoritesRef = FirebaseDatabase.getInstance().getReference("favorites").child(userId);
 
-        if (recipeId != null && !recipeId.isEmpty()) {
-            fetchRecipeDetails(recipeId, title, description, ingredients, steps, recipeImage, country, servings, postedBy);
-        } else {
+        if (recipeId == null || recipeId.isEmpty()) {
             Toast.makeText(this, "Invalid Recipe ID!", Toast.LENGTH_SHORT).show();
             finish();
+            return;
         }
+
+        // Initialize Firebase reference
+        favoritesRef = FirebaseDatabase.getInstance().getReference("favorites").child(userId);
+
+        // Load recipe details and comments
+        fetchRecipeDetails(recipeId, title, description, ingredients, steps, recipeImage, country, servings, postedBy);
+        loadComments();
 
         // Handle the back button
         btnBack.setOnClickListener(v -> onBackPressed());
+
         // Handle the favorite button
         btnFavorite.setOnClickListener(v -> toggleFavorite());
+
+        // Handle Add Comment button
+        addCommentBtn.setOnClickListener(v -> addCommentDialog());
+
+        // Initialize AlertDialog
+        alertDialog = new AlertDialog.Builder(this)
+                .setTitle("Please Wait")
+                .setCancelable(false)
+                .create();
+    }
+
+    private void loadComments() {
+        commentsArrayList = new ArrayList<>();
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Recipes");
+        ref.child(recipeId).child("Comments")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        commentsArrayList.clear();
+                        for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                            ModelComments modelComments = ds.getValue(ModelComments.class);
+                            if (modelComments != null) {
+                                commentsArrayList.add(modelComments);
+                            }
+                        }
+                        adapterComment = new AdapterComment(commentsArrayList, RecipeDetail.this);
+                        commentsRv.setAdapter(adapterComment);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        Toast.makeText(RecipeDetail.this, "Failed to load comments", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private String comment = "";
+
+    private void addCommentDialog() {
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_comment_add, null);
+        EditText commentEditText = dialogView.findViewById(R.id.commentEt);
+        ImageButton btnBack = dialogView.findViewById(R.id.btn_back);
+        Button btnSubmit = dialogView.findViewById(R.id.Btn_Submit);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.CustomDialog);
+        builder.setView(dialogView);
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+
+        btnBack.setOnClickListener(view -> alertDialog.dismiss());
+
+        btnSubmit.setOnClickListener(view -> {
+            comment = commentEditText.getText().toString().trim();
+            if (TextUtils.isEmpty(comment.trim())) {
+                Toast.makeText(RecipeDetail.this, "Enter your comment", Toast.LENGTH_SHORT).show();
+            } else {
+                alertDialog.dismiss();
+                addComment();
+            }
+        });
+    }
+
+    private void addComment() {
+        alertDialog.setMessage("Adding comment...");
+        alertDialog.show();
+
+        String timestamp = String.valueOf(System.currentTimeMillis());
+
+        HashMap<String, String> hashMap = new HashMap<>();
+        hashMap.put("id", timestamp);
+        hashMap.put("recipeId", recipeId);
+        hashMap.put("timestamp", timestamp);
+        hashMap.put("comment", comment);
+        hashMap.put("uid", userId);
+
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Recipes");
+        ref.child(recipeId).child("Comments").child(timestamp)
+                .setValue(hashMap)
+                .addOnSuccessListener(unused -> {
+                    alertDialog.dismiss();
+                    Toast.makeText(RecipeDetail.this, "Comment added", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    alertDialog.dismiss();
+                    Toast.makeText(RecipeDetail.this, "Failed to add comment: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void fetchRecipeDetails(String recipeId, TextView title, TextView description, TextView ingredients, TextView steps, ImageView recipeImage, TextView country, TextView servings, TextView postedBy) {
@@ -76,9 +201,9 @@ public class RecipeDetail extends AppCompatActivity {
                         description.setText(recipe.getDescription());
                         ingredients.setText(recipe.getIngredients());
                         steps.setText(recipe.getSteps());
-                        country.setText("Quốc gia: " + recipe.getCountry());
-                        servings.setText("Khẩu phần: " + recipe.getServings());
-                        postedBy.setText("Người đăng: " + recipe.getUserName());
+                        country.setText("Country: " + recipe.getCountry());
+                        servings.setText("Servings: " + recipe.getServings());
+                        postedBy.setText("Posted by: " + recipe.getUserName());
 
                         // Set chat button to start chat activity with the correct user
                         btnChat.setOnClickListener(v -> openChatActivity(recipe.getUserUid(), recipe.getUserName()));
@@ -136,8 +261,6 @@ public class RecipeDetail extends AppCompatActivity {
                         isFavorite = true;
                         updateFavoriteButton();
                         Toast.makeText(RecipeDetail.this, "Added to favorites", Toast.LENGTH_SHORT).show();
-
-
                     })
                     .addOnFailureListener(e -> Toast.makeText(RecipeDetail.this, "Failed to add to favorites", Toast.LENGTH_SHORT).show());
         }
@@ -145,18 +268,13 @@ public class RecipeDetail extends AppCompatActivity {
 
     private void openChatActivity(String otherUserId, String otherUserName) {
         if (otherUserId == null || otherUserId.isEmpty()) {
-            Toast.makeText(this, "Người dùng không hợp lệ!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Invalid user!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Tạo đối tượng UserModel với userId và userName
-        UserModel otherUser = new UserModel();
-        otherUser.setUid(otherUserId);
-        otherUser.setName(otherUserName);
-
-        // Truyền đối tượng UserModel vào Intent
         Intent intent = new Intent(RecipeDetail.this, ChatActivity.class);
-        intent.putExtra("otherUser", otherUser);  // Truyền toàn bộ đối tượng UserModel
+        intent.putExtra("otherUserId", otherUserId);
+        intent.putExtra("otherUserName", otherUserName);
         startActivity(intent);
     }
 }
