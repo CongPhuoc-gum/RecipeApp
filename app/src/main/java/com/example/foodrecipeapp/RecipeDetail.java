@@ -201,9 +201,9 @@ public class RecipeDetail extends AppCompatActivity {
                         description.setText(recipe.getDescription());
                         ingredients.setText(recipe.getIngredients());
                         steps.setText(recipe.getSteps());
-                        country.setText("Country: " + recipe.getCountry());
-                        servings.setText("Servings: " + recipe.getServings());
-                        postedBy.setText("Posted by: " + recipe.getUserName());
+                        country.setText("Quốc Gia: " + recipe.getCountry());
+                        servings.setText("Khẩu Phần: " + recipe.getServings());
+                        postedBy.setText("Người Đăng: " + recipe.getUserName());
 
                         // Set chat button to start chat activity with the correct user
                         btnChat.setOnClickListener(v -> openChatActivity(recipe.getUserUid(), recipe.getUserName()));
