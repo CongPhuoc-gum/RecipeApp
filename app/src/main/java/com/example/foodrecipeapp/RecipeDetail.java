@@ -268,13 +268,18 @@ public class RecipeDetail extends AppCompatActivity {
 
     private void openChatActivity(String otherUserId, String otherUserName) {
         if (otherUserId == null || otherUserId.isEmpty()) {
-            Toast.makeText(this, "Invalid user!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Người dùng không hợp lệ!", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        // Tạo đối tượng UserModel với userId và userName
+        UserModel otherUser = new UserModel();
+        otherUser.setUid(otherUserId);
+        otherUser.setName(otherUserName);
+
+        // Truyền đối tượng UserModel vào Intent
         Intent intent = new Intent(RecipeDetail.this, ChatActivity.class);
-        intent.putExtra("otherUserId", otherUserId);
-        intent.putExtra("otherUserName", otherUserName);
+        intent.putExtra("otherUser", otherUser);  // Truyền toàn bộ đối tượng UserModel
         startActivity(intent);
     }
 }
