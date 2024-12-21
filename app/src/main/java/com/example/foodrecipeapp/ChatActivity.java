@@ -32,6 +32,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -115,7 +117,26 @@ public class ChatActivity extends AppCompatActivity {
 
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
             uri = data.getData();
-            sendImageMessage(uri);  // Call the send image method with the selected image URI
+            // Upload to Firebase Storage first
+            String fileName = "chat_images/" + System.currentTimeMillis() + ".jpg";
+            StorageReference imageRef = FirebaseStorage.getInstance().getReference().child(fileName);
+
+            imageRef.putFile(uri)
+                    .addOnSuccessListener(taskSnapshot -> {
+                        imageRef.getDownloadUrl()
+                                .addOnSuccessListener(downloadUri -> {
+                                    // Send message with HTTP URL instead of content:// URI
+                                    sendImageMessage(downloadUri.toString());
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(ChatActivity.this, "Failed to get image URL", Toast.LENGTH_SHORT).show();
+                                    Log.e("ChatActivity", "Failed to get image URL", e);
+                                });
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(ChatActivity.this, "Failed to upload image", Toast.LENGTH_SHORT).show();
+                        Log.e("ChatActivity", "Failed to upload image", e);
+                    });
         } else {
             Toast.makeText(this, "No image selected", Toast.LENGTH_SHORT).show();
         }
@@ -175,15 +196,14 @@ public class ChatActivity extends AppCompatActivity {
     }
 
 
-    private void sendImageMessage(Uri imageUri) {
-        String messageType = "image"; // Image message type
-        String imageUrl = imageUri.toString(); // You can upload image to Firebase Storage and get the URL here
+    private void sendImageMessage(String imageUrl) {
+        String messageType = "image";
 
         ChatMessageModel chatMessageModel = new ChatMessageModel(
                 imageUrl,
                 FirebaseUtil.currentUserId(),
                 ServerValue.TIMESTAMP,
-                messageType // Set message type as image
+                messageType
         );
 
         DatabaseReference chatsRef = FirebaseUtil.getChatroomReference(chatroomId).child("chats");

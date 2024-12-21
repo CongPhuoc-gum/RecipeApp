@@ -51,6 +51,7 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
         ChatMessageModel model = userList.get(position);
 
         if (model.getSenderId().equals(FirebaseUtil.currentUserId())) {
+            // Tin nhắn của người dùng hiện tại
             holder.leftChatLayout.setVisibility(View.GONE);
             holder.rightChatLayout.setVisibility(View.VISIBLE);
 
@@ -62,11 +63,13 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
                 holder.rightChatTextview.setVisibility(View.GONE);
                 holder.rightChatImageview.setVisibility(View.VISIBLE);
                 Glide.with(context)
-                        .load(model.getMessage())  // Assuming the URL of the image
+                        .load(model.getMessage())
                         .placeholder(R.drawable.placeholder_image)
+                        .error(R.drawable.placeholder_image)  // Hình hiển thị khi lỗi
                         .into(holder.rightChatImageview);
             }
         } else {
+            // Tin nhắn của người khác
             holder.rightChatLayout.setVisibility(View.GONE);
             holder.leftChatLayout.setVisibility(View.VISIBLE);
 
@@ -78,12 +81,14 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
                 holder.leftChatTextview.setVisibility(View.GONE);
                 holder.leftChatImageview.setVisibility(View.VISIBLE);
                 Glide.with(context)
-                        .load(model.getMessage())  // Assuming the URL of the image
+                        .load(model.getMessage())
                         .placeholder(R.drawable.placeholder_image)
+                        .error(R.drawable.placeholder_image)
                         .into(holder.leftChatImageview);
             }
         }
     }
+
 
     @Override
     public int getItemCount() {
